@@ -2,449 +2,402 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <meta name="theme-color" content="#6a11cb">
-    <link rel="manifest" href="data:application/manifest+json,{
-        &quot;name&quot;: &quot;تطبيق الطلبات&quot;,
-        &quot;short_name&quot;: &quot;طلبات&quot;,
-        &quot;start_url&quot;: &quot;.&quot;,
-        &quot;display&quot;: &quot;standalone&quot;,
-        &quot;background_color&quot;: &quot;#f5f7fa&quot;,
-        &quot;theme_color&quot;: &quot;#6a11cb&quot;,
-        &quot;icons&quot;: [{
-            &quot;src&quot;: &quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%236a11cb'/%3E%3Ctext x='50' y='70' font-size='70' text-anchor='middle' fill='white' font-family='Arial'%3E📦%3C/text%3E%3C/svg%3E&quot;,
-            &quot;sizes&quot;: &quot;192x192&quot;,
-            &quot;type&quot;: &quot;image/svg+xml&quot;
-        }]
-    }">
-    <title>تطبيق الطلبات - نسخة PWA</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="تطبيق الطلبات">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%236a11cb'/%3E%3Ctext x='50' y='70' font-size='70' text-anchor='middle' fill='white' font-family='Arial'%3E📦%3C/text%3E%3C/svg%3E">
+    <link rel="manifest" href="manifest.json">
+    <title>تطبيق الطلبات - النسخة المتكاملة</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
+        /* Reset and base */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         }
-        
+
+        html {
+            font-size: 16px; /* base for rem */
+        }
+
         body {
             background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
             padding: 0;
             margin: 0;
-            font-size: 16px;
+            line-height: 1.5;
+            color: #1c1e21; /* فيسبوك رمادي غامق */
         }
-        
-        /* تحسينات الاستجابة للشاشات الصغيرة */
+
+        /* تحسين قابلية القراءة على جميع الشاشات */
         @media (max-width: 600px) {
-            body {
+            html {
                 font-size: 14px;
             }
-            .header h1 {
-                font-size: 1.8rem;
-            }
-            .header p {
-                font-size: 1rem;
-            }
-            .nav-btn {
-                padding: 0.7rem 1.2rem;
-                font-size: 1rem;
-            }
-            .container {
-                padding: 0 1rem;
-            }
-            .content-section {
-                padding: 1.5rem;
-            }
-            .section-title {
-                font-size: 1.6rem;
-            }
-            .form-group input,
-            .form-group textarea,
-            .form-group select {
-                padding: 0.9rem;
-                font-size: 1rem;
-            }
-            .btn-primary, .btn-secondary, .btn-success, .btn-danger, .btn-admin {
-                padding: 0.8rem 1.5rem;
-                font-size: 1rem;
-            }
-            .orders-grid {
-                grid-template-columns: 1fr;
-            }
-            .filter-bar {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            .filter-bar select {
-                min-width: auto;
-            }
-            .location-status {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 10px;
-            }
-            #map {
-                height: 350px;
-            }
-            .modal-content {
-                padding: 1.5rem;
-                width: 98%;
+        }
+
+        @media (min-width: 1200px) {
+            html {
+                font-size: 18px;
             }
         }
-        
-        /* شاشات متوسطة */
-        @media (min-width: 601px) and (max-width: 1024px) {
-            body {
-                font-size: 15px;
-            }
-            .container {
-                padding: 0 1.5rem;
-            }
-            .orders-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-        
+
+        /* Header */
         .header {
             background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
             color: white;
-            padding: 1.8rem;
+            padding: 1.2rem 1rem;
             text-align: center;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
-        
+
         .header h1 {
-            margin-bottom: 0.5rem;
-            font-size: 2.5rem;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            font-size: 1.8rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
         }
-        
-        .header p {
-            opacity: 0.9;
-            font-size: 1.3rem;
-        }
-        
-        /* زر التثبيت المخصص */
+
         #installBtn {
             background: white;
             color: #6a11cb;
             border: none;
-            padding: 0.5rem 1.2rem;
-            border-radius: 40px;
-            font-size: 1rem;
-            font-weight: bold;
-            margin-right: 1rem;
+            padding: 0.4rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-right: 0.5rem;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            transition: all 0.3s;
+            gap: 0.3rem;
+            transition: all 0.2s;
+            border: 1px solid transparent;
         }
         #installBtn:hover {
             background: #f0f0f0;
-            transform: scale(1.05);
+            transform: scale(1.02);
         }
-        #installBtn i {
-            font-size: 1.2rem;
-        }
-        
+
+        /* Navigation */
         .nav {
             display: flex;
             justify-content: center;
-            gap: 1rem;
-            padding: 1.5rem;
+            gap: 0.5rem;
+            padding: 0.8rem 1rem;
             background: white;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.1);
             flex-wrap: wrap;
-            border-bottom: 3px solid #6a11cb;
+            border-bottom: 2px solid #6a11cb;
+            position: sticky;
+            top: 5rem;
+            z-index: 99;
         }
-        
+
         .nav-btn {
             background: #f0f2f5;
             border: none;
-            padding: 1rem 2.5rem;
-            border-radius: 50px;
-            font-size: 1.2rem;
+            padding: 0.7rem 1.2rem;
+            border-radius: 2rem;
+            font-size: 0.95rem;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.2s;
             display: flex;
             align-items: center;
-            gap: 10px;
-            color: #555;
-            font-weight: 600;
+            gap: 0.5rem;
+            color: #050505;
+            font-weight: 500;
+            white-space: nowrap;
         }
-        
+
         .nav-btn.active {
             background: linear-gradient(135deg, #6a11cb, #2575fc);
             color: white;
-            box-shadow: 0 4px 10px rgba(106, 17, 203, 0.3);
+            box-shadow: 0 2px 6px rgba(106, 17, 203, 0.3);
         }
-        
+
         .nav-btn i {
-            font-size: 1.3rem;
+            font-size: 1.1rem;
         }
-        
+
+        /* Container */
         .container {
-            max-width: 1400px;
-            margin: 2rem auto;
-            padding: 0 2rem;
+            max-width: 75rem; /* 1200px */
+            margin: 1rem auto;
+            padding: 0 1rem;
         }
-        
+
+        /* Sections */
         .content-section {
             display: none;
             background: white;
-            border-radius: 25px;
-            padding: 2.5rem;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border-radius: 1.2rem;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
             margin-top: 1rem;
-            animation: fadeIn 0.3s ease;
+            animation: fadeIn 0.2s ease;
         }
-        
+
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
+            from { opacity: 0; transform: translateY(0.3rem); }
             to { opacity: 1; transform: translateY(0); }
         }
-        
+
         .content-section.active {
             display: block;
         }
-        
+
         .section-title {
-            font-size: 2.2rem;
-            margin-bottom: 2rem;
-            color: #333;
+            font-size: 1.6rem;
+            margin-bottom: 1.5rem;
+            color: #1c1e21;
             display: flex;
             align-items: center;
-            gap: 15px;
-            border-bottom: 3px solid #f0f2f5;
-            padding-bottom: 1.2rem;
+            gap: 0.8rem;
+            border-bottom: 2px solid #e4e6eb;
+            padding-bottom: 0.8rem;
         }
-        
+
         .section-title i {
             color: #6a11cb;
-            font-size: 2.2rem;
+            font-size: 1.8rem;
         }
-        
+
+        /* Form elements */
         .form-group {
-            margin-bottom: 1.8rem;
+            margin-bottom: 1.5rem;
         }
-        
+
         .form-group label {
             display: block;
-            margin-bottom: 0.8rem;
-            color: #444;
-            font-weight: 700;
-            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+            color: #050505;
+            font-weight: 600;
+            font-size: 1rem;
         }
-        
+
         .form-group input,
         .form-group textarea,
         .form-group select {
             width: 100%;
-            padding: 1.2rem;
-            border: 2px solid #e0e0e0;
-            border-radius: 15px;
-            font-size: 1.1rem;
-            transition: all 0.3s;
-            background: #fafafa;
+            padding: 0.9rem 1rem;
+            border: 1px solid #ccd0d5;
+            border-radius: 0.8rem;
+            font-size: 1rem;
+            transition: all 0.2s;
+            background: #ffffff;
         }
-        
+
         .form-group input:focus,
         .form-group textarea:focus,
         .form-group select:focus {
             outline: none;
             border-color: #6a11cb;
-            box-shadow: 0 0 0 4px rgba(106, 17, 203, 0.1);
-            background: white;
+            box-shadow: 0 0 0 3px rgba(106, 17, 203, 0.1);
         }
-        
+
+        /* Buttons */
         .btn-primary,
         .btn-secondary,
         .btn-success,
         .btn-danger,
         .btn-admin {
             border: none;
-            padding: 1.2rem 2.5rem;
-            border-radius: 15px;
-            font-size: 1.2rem;
+            padding: 0.8rem 1.5rem;
+            border-radius: 2rem;
+            font-size: 1rem;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.2s;
             display: inline-flex;
             align-items: center;
-            gap: 12px;
-            font-weight: 700;
+            gap: 0.6rem;
+            font-weight: 600;
+            line-height: 1.2;
+            white-space: nowrap;
         }
-        
+
         .btn-primary {
             background: linear-gradient(135deg, #6a11cb, #2575fc);
             color: white;
-            box-shadow: 0 4px 15px rgba(106, 17, 203, 0.3);
+            box-shadow: 0 2px 8px rgba(106, 17, 203, 0.3);
         }
-        
+
         .btn-secondary {
-            background: #f0f2f5;
-            color: #555;
+            background: #e4e6eb;
+            color: #050505;
         }
-        
+
         .btn-success {
             background: linear-gradient(135deg, #11998e, #38ef7d);
             color: white;
         }
-        
+
         .btn-danger {
             background: linear-gradient(135deg, #eb3349, #f45c43);
             color: white;
         }
-        
+
         .btn-admin {
             background: linear-gradient(135deg, #8e2de2, #4a00e0);
             color: white;
         }
-        
+
         .btn-primary:hover,
         .btn-secondary:hover,
         .btn-success:hover,
         .btn-danger:hover,
         .btn-admin:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
-        
+
+        /* Map */
         #map {
-            height: 550px;
+            height: 25rem; /* 400px */
             width: 100%;
-            border-radius: 25px;
-            margin-bottom: 1.8rem;
-            border: 3px solid white;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            border-radius: 1.2rem;
+            margin-bottom: 1rem;
+            border: 2px solid white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             z-index: 1;
         }
-        
+
         .location-status {
-            background: #f8f9fa;
-            padding: 1.2rem 2rem;
-            border-radius: 20px;
-            margin: 2rem 0;
+            background: #f0f2f5;
+            padding: 1rem 1.2rem;
+            border-radius: 2rem;
+            margin: 1.5rem 0;
             display: flex;
             align-items: center;
-            gap: 20px;
-            color: #555;
-            border: 1px solid #e0e0e0;
-            font-size: 1.2rem;
+            gap: 1rem;
+            color: #050505;
+            border: 1px solid #ccd0d5;
+            font-size: 0.95rem;
+            flex-wrap: wrap;
         }
-        
+
         .location-status i {
             color: #2575fc;
-            font-size: 1.6rem;
+            font-size: 1.3rem;
         }
-        
+
         .filter-bar {
             display: flex;
-            gap: 1.5rem;
+            gap: 1rem;
             align-items: center;
-            margin-bottom: 2.5rem;
+            margin-bottom: 1.8rem;
             flex-wrap: wrap;
-            background: #f8f9fa;
-            padding: 1.5rem;
-            border-radius: 20px;
+            background: #f0f2f5;
+            padding: 1rem;
+            border-radius: 2rem;
         }
-        
+
         .filter-bar select {
             flex: 2;
-            min-width: 300px;
-            padding: 1.2rem;
-            border: 2px solid #e0e0e0;
-            border-radius: 15px;
-            font-size: 1.2rem;
+            min-width: 12rem;
+            padding: 0.8rem 1rem;
+            border: 1px solid #ccd0d5;
+            border-radius: 2rem;
+            font-size: 0.95rem;
             background: white;
         }
-        
+
+        /* Orders grid */
         .orders-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-            gap: 2rem;
-            margin-top: 2rem;
+            grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+            gap: 1.2rem;
+            margin-top: 1.2rem;
         }
-        
+
         .order-item {
             background: white;
-            border-radius: 22px;
-            padding: 1.8rem;
-            border-right: 8px solid #6a11cb;
-            transition: all 0.3s;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-            border: 1px solid #f0f0f0;
+            border-radius: 1.2rem;
+            padding: 1.2rem;
+            border-right: 0.3rem solid #6a11cb;
+            transition: all 0.2s;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+            border: 1px solid #e4e6eb;
         }
-        
+
         .order-item:hover {
-            transform: translateY(-6px);
-            box-shadow: 0 20px 30px rgba(106, 17, 203, 0.1);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(106, 17, 203, 0.1);
         }
-        
+
         .order-item-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 1.2rem;
+            margin-bottom: 0.8rem;
         }
-        
+
         .order-item-service {
-            font-weight: 800;
-            color: #333;
-            font-size: 1.3rem;
-        }
-        
-        .order-item-status {
-            font-size: 1rem;
-            padding: 0.5rem 1.2rem;
-            border-radius: 40px;
             font-weight: 700;
+            color: #050505;
+            font-size: 1.1rem;
         }
-        
+
+        .order-item-status {
+            font-size: 0.8rem;
+            padding: 0.3rem 0.8rem;
+            border-radius: 2rem;
+            font-weight: 600;
+        }
+
         .status-new {
             background: #dbeafe;
             color: #1d4ed8;
         }
-        
+
         .status-taken {
             background: #fef3c7;
             color: #d97706;
         }
-        
+
         .status-completed {
             background: #d1fae5;
             color: #065f46;
         }
-        
+
         .status-cancelled {
             background: #fee2e2;
             color: #b91c1c;
         }
-        
+
         .order-item-details {
-            color: #555;
-            font-size: 1.1rem;
-            margin: 1rem 0;
-            line-height: 1.6;
+            color: #4b5563;
+            font-size: 0.95rem;
+            margin: 0.8rem 0;
+            line-height: 1.5;
         }
-        
+
         .order-item-footer {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-top: 1.2rem;
-            font-size: 1.1rem;
-            color: #666;
+            margin-top: 0.8rem;
+            font-size: 0.9rem;
+            color: #6b7280;
         }
-        
+
         .order-item-actions {
             display: flex;
-            gap: 1rem;
+            gap: 0.5rem;
         }
-        
+
+        /* Modal */
         .modal {
             display: none;
             position: fixed;
@@ -456,119 +409,116 @@
             justify-content: center;
             align-items: center;
             z-index: 1000;
-            backdrop-filter: blur(5px);
+            backdrop-filter: blur(3px);
+            padding: 1rem;
         }
-        
+
         .modal.active {
             display: flex;
         }
-        
+
         .modal-content {
             background: white;
-            border-radius: 30px;
-            max-width: 700px;
-            width: 95%;
+            border-radius: 1.5rem;
+            max-width: 35rem;
+            width: 100%;
             max-height: 90vh;
             overflow-y: auto;
-            padding: 2.5rem;
+            padding: 1.8rem;
             position: relative;
-            box-shadow: 0 30px 60px rgba(0,0,0,0.3);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
         }
-        
+
         .modal-close {
             position: absolute;
-            top: 1.5rem;
-            left: 1.5rem;
+            top: 1rem;
+            left: 1rem;
             background: none;
             border: none;
-            font-size: 2.5rem;
+            font-size: 2rem;
             cursor: pointer;
-            color: #666;
-            transition: color 0.2s;
+            color: #6b7280;
+            line-height: 1;
         }
-        
+
         .modal-close:hover {
             color: #f00;
         }
-        
+
         .service-checkbox-group {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 1rem;
+            grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+            gap: 0.8rem;
             margin-top: 1rem;
-            background: #f8f9fa;
-            padding: 1.5rem;
-            border-radius: 20px;
+            background: #f9fafb;
+            padding: 1rem;
+            border-radius: 1rem;
         }
-        
+
         .service-checkbox {
             display: flex;
             align-items: center;
-            gap: 0.8rem;
-            padding: 0.8rem;
+            gap: 0.5rem;
+            padding: 0.5rem;
             background: white;
-            border-radius: 12px;
-            border: 1px solid #e0e0e0;
-            font-size: 1.1rem;
+            border-radius: 0.8rem;
+            border: 1px solid #e5e7eb;
+            font-size: 0.9rem;
         }
-        
+
         .channels-table {
             width: 100%;
             border-collapse: collapse;
-            margin: 2rem 0;
-            border-radius: 20px;
+            margin: 1.5rem 0;
+            border-radius: 1rem;
             overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            font-size: 0.9rem;
         }
-        
+
         .channels-table th,
         .channels-table td {
-            border: 1px solid #e0e0e0;
-            padding: 1.2rem;
+            border: 1px solid #e5e7eb;
+            padding: 0.8rem;
             text-align: right;
-            font-size: 1.1rem;
         }
-        
+
         .channels-table th {
-            background: linear-gradient(135deg, #f0f2f5, #e9ecef);
-            font-weight: 800;
+            background: #f3f4f6;
+            font-weight: 700;
         }
-        
+
         .channel-link {
             background: #25D366;
             color: white;
-            padding: 0.7rem 1.5rem;
-            border-radius: 40px;
+            padding: 0.4rem 1rem;
+            border-radius: 2rem;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
-            gap: 10px;
-            font-size: 1.1rem;
-            transition: background 0.2s;
+            gap: 0.3rem;
+            font-size: 0.85rem;
         }
-        
-        .channel-link:hover {
-            background: #128C7E;
-        }
-        
+
         .admin-panel {
-            background: linear-gradient(135deg, #f3e5f5, #ede7f6);
-            padding: 2rem;
-            border-radius: 22px;
-            margin-bottom: 2.5rem;
-            border: 1px solid #d1c4e9;
+            background: #f3f4f6;
+            padding: 1.5rem;
+            border-radius: 1.2rem;
+            margin-bottom: 1.8rem;
+            border: 1px solid #d1d5db;
         }
-        
+
         .footer {
             text-align: center;
-            padding: 2rem;
-            color: #666;
-            font-size: 1.1rem;
+            padding: 1.5rem;
+            color: #6b7280;
+            font-size: 0.9rem;
             background: white;
-            margin-top: 2.5rem;
-            border-top: 1px solid #e0e0e0;
+            margin-top: 2rem;
+            border-top: 1px solid #e5e7eb;
         }
-        
+
+        /* Loading */
         #loadingOverlay {
             display: none;
             position: fixed;
@@ -576,45 +526,44 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.6);
+            background: rgba(0,0,0,0.5);
             z-index: 10000;
             justify-content: center;
             align-items: center;
-            backdrop-filter: blur(4px);
+            backdrop-filter: blur(2px);
         }
-        
+
         .loading-box {
             background: white;
-            padding: 2.5rem;
-            border-radius: 40px;
+            padding: 2rem;
+            border-radius: 2rem;
             text-align: center;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
             animation: pulse 1.5s infinite;
         }
-        
+
         .loading-box i {
-            font-size: 4rem;
+            font-size: 3rem;
             color: #6a11cb;
-            margin-bottom: 1.2rem;
+            margin-bottom: 1rem;
         }
-        
+
         .loading-box p {
-            font-size: 1.5rem;
-            color: #333;
-            font-weight: 700;
+            font-size: 1.2rem;
+            color: #1f2937;
+            font-weight: 600;
         }
-        
+
         @keyframes pulse {
             0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
+            50% { transform: scale(1.02); }
             100% { transform: scale(1); }
         }
     </style>
 </head>
 <body>
     <div class="header">
-        <h1><i class="fas fa-tasks"></i> تطبيق الطلبات <button id="installBtn" style="display: none;"><i class="fas fa-download"></i> تثبيت التطبيق</button></h1>
-        <p>منصة طلبات الخدمات - نسخة PWA متكاملة</p>
+        <h1><i class="fas fa-tasks"></i> تطبيق الطلبات <button id="installBtn" style="display: none;"><i class="fas fa-download"></i> تثبيت</button></h1>
     </div>
     
     <div class="nav">
@@ -625,7 +574,7 @@
     </div>
     
     <div class="container">
-        <!-- قسم الرئيسية -->
+        <!-- الرئيسية -->
         <div id="homeSection" class="content-section active">
             <h2 class="section-title"><i class="fas fa-map-marked-alt"></i> الخريطة والطلبات القريبة</h2>
             <div id="map"></div>
@@ -633,8 +582,8 @@
             <div class="location-status" id="locationStatus">
                 <i class="fas fa-map-pin"></i>
                 <span>جاري تحديد الموقع...</span>
-                <button id="locateMeBtn" class="btn-secondary" style="margin-right: auto; padding: 0.8rem 2rem;">
-                    <i class="fas fa-crosshairs"></i> تحديث موقعي
+                <button id="locateMeBtn" class="btn-secondary" style="margin-right: auto; padding: 0.5rem 1.2rem;">
+                    <i class="fas fa-crosshairs"></i> تحديث
                 </button>
             </div>
             
@@ -656,14 +605,14 @@
                 <button class="btn-primary" id="newOrderBtn"><i class="fas fa-plus"></i> طلب جديد</button>
             </div>
             
-            <h3 style="margin: 2.5rem 0 1.2rem; font-size: 1.8rem;"><i class="fas fa-location-arrow"></i> الطلبات القريبة (ضمن 2 كم)</h3>
+            <h3 style="margin: 1.8rem 0 1rem; font-size: 1.3rem;"><i class="fas fa-location-arrow"></i> الطلبات القريبة (ضمن 2 كم)</h3>
             <div id="nearbyOrders" class="orders-grid"></div>
             
-            <h3 style="margin: 2.5rem 0 1.2rem; font-size: 1.8rem;"><i class="fas fa-lightbulb"></i> اقتراحات لخدمات أخرى قريبة</h3>
+            <h3 style="margin: 1.8rem 0 1rem; font-size: 1.3rem;"><i class="fas fa-lightbulb"></i> اقتراحات لخدمات أخرى قريبة</h3>
             <div id="suggestedOrders" class="orders-grid"></div>
         </div>
         
-        <!-- قسم الزبون -->
+        <!-- الزبون -->
         <div id="customerSection" class="content-section">
             <h2 class="section-title"><i class="fas fa-user-circle"></i> بيانات الزبون</h2>
             <form id="customerForm">
@@ -679,11 +628,11 @@
                 <button type="submit" class="btn-primary"><i class="fas fa-save"></i> حفظ</button>
             </form>
             
-            <h3 style="margin: 2.5rem 0 1.5rem; font-size: 1.8rem;">طلباتي السابقة</h3>
+            <h3 style="margin: 2rem 0 1rem; font-size: 1.3rem;">طلباتي السابقة</h3>
             <div id="myOrdersList" class="orders-grid"></div>
         </div>
         
-        <!-- قسم مقدم الخدمة -->
+        <!-- مقدم الخدمة -->
         <div id="providerSection" class="content-section">
             <h2 class="section-title"><i class="fas fa-id-card"></i> إعدادات مقدم الخدمة</h2>
             <form id="providerForm">
@@ -712,26 +661,20 @@
                 <button type="submit" class="btn-primary"><i class="fas fa-save"></i> حفظ الإعدادات</button>
             </form>
             
-            <div id="providerChannelsContainer" style="margin-top: 2.5rem; display: none;">
-                <h3 style="font-size: 1.8rem;"><i class="fas fa-link"></i> روابط القنوات للخدمات التي تقدمها</h3>
-                <p style="font-size: 1.2rem;">انضم إلى القنوات المناسبة لمتابعة الطلبات:</p>
+            <div id="providerChannelsContainer" style="margin-top: 2rem; display: none;">
+                <h3 style="font-size: 1.3rem;"><i class="fas fa-link"></i> روابط القنوات للخدمات التي تقدمها</h3>
+                <p style="font-size: 0.95rem;">انضم إلى القنوات المناسبة لمتابعة الطلبات:</p>
                 <table class="channels-table" id="providerChannelsTable">
-                    <thead>
-                        <tr>
-                            <th>الخدمة</th>
-                            <th>رابط القناة</th>
-                            <th>انضمام</th>
-                        </tr>
-                    </thead>
+                    <thead><tr><th>الخدمة</th><th>رابط القناة</th><th>انضمام</th></tr></thead>
                     <tbody id="providerChannelsBody"></tbody>
                 </table>
             </div>
             
-            <h3 style="margin: 2.5rem 0 1.5rem; font-size: 1.8rem;">الطلبات المأخوذة</h3>
+            <h3 style="margin: 2rem 0 1rem; font-size: 1.3rem;">الطلبات المأخوذة</h3>
             <div id="takenOrdersList"></div>
         </div>
         
-        <!-- قسم الأدمن -->
+        <!-- الأدمن -->
         <div id="adminSection" class="content-section">
             <h2 class="section-title"><i class="fas fa-crown"></i> لوحة تحكم الأدمن</h2>
             
@@ -744,23 +687,17 @@
             </div>
             
             <div id="adminContent" style="display: none;">
-                <h3 style="font-size: 1.8rem;">إعدادات البوت والقنوات</h3>
+                <h3 style="font-size: 1.3rem;">إعدادات البوت والقنوات</h3>
                 
                 <div class="form-group">
-                    <label>توكن البوت العام (يستخدم لجميع القنوات)</label>
+                    <label>توكن البوت العام</label>
                     <input type="text" id="adminBotToken" placeholder="123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11">
                 </div>
                 
-                <p style="font-size: 1.2rem;">أدخل معرف القناة لكل خدمة (مثل @username أو -100...). يجب أن يكون البوت مضافاً إلى القناة كمشرف.</p>
+                <p style="font-size: 0.95rem;">أدخل معرف القناة لكل خدمة (مثل @username أو -100...). يجب أن يكون البوت مضافاً إلى القناة كمشرف.</p>
                 
                 <table class="channels-table" id="adminChannelsTable">
-                    <thead>
-                        <tr>
-                            <th>الخدمة</th>
-                            <th>معرف القناة (لإرسال الإشعارات)</th>
-                            <th>رابط الانضمام (لمقدم الخدمة)</th>
-                        </tr>
-                    </thead>
+                    <thead><tr><th>الخدمة</th><th>معرف القناة</th><th>رابط الانضمام</th></tr></thead>
                     <tbody id="adminChannelsBody"></tbody>
                 </table>
                 
@@ -773,7 +710,7 @@
     <div id="newOrderModal" class="modal">
         <div class="modal-content">
             <button class="modal-close">&times;</button>
-            <h2 style="font-size: 2rem;"><i class="fas fa-plus-circle"></i> إنشاء طلب جديد</h2>
+            <h2 style="font-size: 1.6rem;"><i class="fas fa-plus-circle"></i> إنشاء طلب جديد</h2>
             <form id="newOrderForm">
                 <div class="form-group">
                     <label>الخدمة</label>
@@ -805,7 +742,7 @@
                         </button>
                     </div>
                 </div>
-                <div style="display: flex; gap: 1.5rem; justify-content: flex-end;">
+                <div style="display: flex; gap: 1rem; justify-content: flex-end;">
                     <button type="submit" class="btn-primary">إرسال الطلب</button>
                     <button type="button" class="btn-secondary" onclick="app.closeModals()">إلغاء</button>
                 </div>
@@ -815,11 +752,11 @@
     
     <!-- مودال اختيار الموقع -->
     <div id="locationPickerModal" class="modal">
-        <div class="modal-content" style="max-width: 1000px;">
+        <div class="modal-content" style="max-width: 50rem;">
             <button class="modal-close">&times;</button>
-            <h2 style="font-size: 2rem;"><i class="fas fa-map-marker-alt"></i> اختر الموقع</h2>
-            <div id="locationMap" style="height: 550px; margin: 1.5rem 0; border-radius: 22px; border: 2px solid #ddd;"></div>
-            <div style="display: flex; gap: 1.5rem; justify-content: center; flex-wrap: wrap;">
+            <h2 style="font-size: 1.6rem;"><i class="fas fa-map-marker-alt"></i> اختر الموقع</h2>
+            <div id="locationMap" style="height: 20rem; margin: 1rem 0; border-radius: 1rem; border: 1px solid #ddd;"></div>
+            <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
                 <button id="useCurrentLocationBtn" class="btn-secondary">
                     <i class="fas fa-location-arrow"></i> استخدام موقعي الحالي
                 </button>
@@ -834,8 +771,8 @@
     <div id="orderDetailsModal" class="modal">
         <div class="modal-content">
             <button class="modal-close">&times;</button>
-            <h2 style="font-size: 2rem;"><i class="fas fa-info-circle"></i> تفاصيل الطلب</h2>
-            <div id="orderDetailsContent" style="font-size: 1.2rem;"></div>
+            <h2 style="font-size: 1.6rem;"><i class="fas fa-info-circle"></i> تفاصيل الطلب</h2>
+            <div id="orderDetailsContent" style="font-size: 1rem;"></div>
         </div>
     </div>
     
@@ -848,10 +785,10 @@
     </div>
     
     <div class="footer">
-        <h3> فريق الدعم :00963949340870</h3>
-        <h3 style="color:red;">شكاوي:00963949340870</h3>
-        <p>تصميم: جلال المصطفى </p>
-        <p id="appStatus" style="font-size: 1.1rem; color: #888;">الحالة: جاهز</p>
+        <p>فريق الدعم: 00963949340870</p>
+        <p style="color:red;">شكاوي: 00963949340870</p>
+        <p>تصميم: جلال المصطفى</p>
+        <p id="appStatus" style="color: #6b7280;">الحالة: جاهز</p>
         <p>جميع الحقوق محفوظة &copy; 2025</p>
     </div>
     
@@ -860,14 +797,14 @@
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', function() {
                 navigator.serviceWorker.register('sw.js').then(function(registration) {
-                    console.log('ServiceWorker registration successful');
+                    console.log('ServiceWorker registered');
                 }, function(err) {
-                    console.log('ServiceWorker registration failed: ', err);
+                    console.log('ServiceWorker failed: ', err);
                 });
             });
         }
 
-        // Install button logic (PWA)
+        // Install button
         let deferredPrompt;
         const installBtn = document.getElementById('installBtn');
         window.addEventListener('beforeinstallprompt', (e) => {
@@ -880,30 +817,30 @@
             if (!deferredPrompt) return;
             deferredPrompt.prompt();
             const { outcome } = await deferredPrompt.userChoice;
-            console.log(`User response to the install prompt: ${outcome}`);
+            console.log(`User response: ${outcome}`);
             deferredPrompt = null;
             installBtn.style.display = 'none';
         });
 
         window.addEventListener('appinstalled', () => {
-            console.log('PWA was installed');
+            console.log('PWA installed');
             installBtn.style.display = 'none';
         });
 
-        // ================== التهيئة ==================
-        const API_BASE_URL = 'https://script.google.com/macros/s/AKfycbwgPe-dUI3wh599QmvcQZGcXllE9z6g1qMnTZ6QirjUZ6Wkxk9TdounFFqiwRZjZPY3dw/exec'; // استبدل هذا الرابط
+        // ================== التطبيق ==================
+        const API_BASE_URL = 'https://script.google.com/macros/s/AKfycbwgPe-dUI3wh599QmvcQZGcXllE9z6g1qMnTZ6QirjUZ6Wkxk9TdounFFqiwRZjZPY3dw/exec';
         const ADMIN_PASSWORD = '009911';
         
         class TalabatApp {
             constructor() {
                 this.config = {
-                    API_BASE_URL: API_BASE_URL,
+                    API_BASE_URL,
                     MAP_CENTER: [35.9312, 36.6336],
                     MAP_ZOOM: 12,
                     UPDATE_INTERVAL: 30000,
                     ORDER_TIMEOUT: 15 * 60 * 1000,
                     TAKEN_TIMEOUT: 60 * 1000,
-                    NEARBY_DISTANCE: 2, // تم التعديل من 1 إلى 2 كم
+                    NEARBY_DISTANCE: 2,
                 };
                 
                 this.state = {
@@ -928,42 +865,26 @@
                 };
                 
                 this.serviceIcons = {
-                    taxi: 'fas fa-taxi',
-                    delivery: 'fas fa-truck',
-                    food: 'fas fa-utensils',
-                    vegetables: 'fas fa-carrot',
-                    rental: 'fas fa-truck-moving',
-                    goods: 'fas fa-boxes',
-                    repair: 'fas fa-wrench',
-                    electrician: 'fas fa-bolt',
-                    appliance: 'fas fa-tv',
-                    store: 'fas fa-store',
-                    restaurant: 'fas fa-hotel',
+                    taxi: 'fas fa-taxi', delivery: 'fas fa-truck', food: 'fas fa-utensils',
+                    vegetables: 'fas fa-carrot', rental: 'fas fa-truck-moving', goods: 'fas fa-boxes',
+                    repair: 'fas fa-wrench', electrician: 'fas fa-bolt', appliance: 'fas fa-tv',
+                    store: 'fas fa-store', restaurant: 'fas fa-hotel',
                 };
                 
                 this.serviceNames = {
-                    taxi: 'تكسي',
-                    delivery: 'توصيل طلبات',
-                    food: 'توصيل وجبات',
-                    vegetables: 'توصيل خضروات',
-                    rental: 'إيجارات نقل',
-                    goods: 'نقل بضائع',
-                    repair: 'تصليح / صيانة',
-                    electrician: 'كهربائي',
-                    appliance: 'إصلاح أدوات كهربائية',
-                    store: 'محل أدوات كهربائية',
-                    restaurant: 'مطاعم',
+                    taxi: 'تكسي', delivery: 'توصيل طلبات', food: 'توصيل وجبات',
+                    vegetables: 'توصيل خضروات', rental: 'إيجارات نقل', goods: 'نقل بضائع',
+                    repair: 'تصليح / صيانة', electrician: 'كهربائي', appliance: 'إصلاح أدوات كهربائية',
+                    store: 'محل أدوات كهربائية', restaurant: 'مطاعم',
                 };
                 
                 this.init();
             }
             
-            // =============== دوال مساعدة ===============
-            showLoading(message = 'جاري التحميل...') {
-                document.getElementById('loadingMessage').innerText = message;
+            showLoading(msg = 'جاري التحميل...') {
+                document.getElementById('loadingMessage').innerText = msg;
                 document.getElementById('loadingOverlay').style.display = 'flex';
             }
-            
             hideLoading() {
                 document.getElementById('loadingOverlay').style.display = 'none';
             }
@@ -977,7 +898,7 @@
                 this.state.isFirstLoad = false;
                 this.startAutoUpdate();
                 this.updateLocationStatus();
-                this.updateAppStatus('جاهز للتشغيل');
+                this.updateAppStatus('جاهز');
                 this.loadFilterPreference();
                 this.showUnakenOrdersOnMap();
             }
@@ -1012,264 +933,135 @@
                     btn.addEventListener('click', () => this.closeModals());
                 });
                 window.addEventListener('click', (e) => {
-                    if (e.target.classList.contains('modal')) {
-                        this.closeModals();
-                    }
+                    if (e.target.classList.contains('modal')) this.closeModals();
                 });
             }
             
             displayProviderChannels() {
-                const selectedServices = [];
-                document.querySelectorAll('input[name="services"]:checked').forEach(cb => {
-                    selectedServices.push(cb.value);
-                });
-                
+                const selected = [];
+                document.querySelectorAll('input[name="services"]:checked').forEach(cb => selected.push(cb.value));
                 const container = document.getElementById('providerChannelsContainer');
                 const tbody = document.getElementById('providerChannelsBody');
-                
-                if (selectedServices.length === 0 || Object.keys(this.state.channels).length === 0) {
+                if (selected.length === 0 || Object.keys(this.state.channels).length === 0) {
                     container.style.display = 'none';
                     return;
                 }
-                
                 let html = '';
-                selectedServices.forEach(service => {
-                    const channel = this.state.channels[service];
-                    if (channel && channel.inviteLink) {
-                        html += `
-                            <tr>
-                                <td><i class="${this.serviceIcons[service]}"></i> ${this.serviceNames[service]}</td>
-                                <td><a href="${channel.inviteLink}" target="_blank" class="channel-link"><i class="fab fa-telegram"></i> رابط القناة</a></td>
-                                <td><a href="${channel.inviteLink}" target="_blank" class="btn-success" style="padding: 0.7rem 1.5rem; font-size: 1.1rem; text-decoration: none;">انضمام</a></td>
-                            </tr>
-                        `;
+                selected.forEach(service => {
+                    const ch = this.state.channels[service];
+                    if (ch && ch.inviteLink) {
+                        html += `<tr><td><i class="${this.serviceIcons[service]}"></i> ${this.serviceNames[service]}</td><td><a href="${ch.inviteLink}" target="_blank" class="channel-link"><i class="fab fa-telegram"></i> رابط</a></td><td><a href="${ch.inviteLink}" target="_blank" class="btn-success" style="padding:0.4rem 1rem;">انضمام</a></td></tr>`;
                     }
                 });
-                
-                if (html) {
-                    tbody.innerHTML = html;
-                    container.style.display = 'block';
-                } else {
-                    container.style.display = 'none';
-                }
+                if (html) { tbody.innerHTML = html; container.style.display = 'block'; }
+                else container.style.display = 'none';
             }
             
             displayAdminChannels() {
                 const tbody = document.getElementById('adminChannelsBody');
                 let html = '';
                 Object.keys(this.serviceNames).forEach(service => {
-                    const channel = this.state.channels[service] || { username: '', inviteLink: '' };
-                    html += `
-                        <tr>
-                            <td><i class="${this.serviceIcons[service]}"></i> ${this.serviceNames[service]}</td>
-                            <td><input type="text" id="username_${service}" class="form-control" value="${channel.username || ''}" placeholder="@username" style="width: 100%; padding: 0.9rem; border-radius: 12px; border: 1px solid #ddd; font-size: 1.1rem;"></td>
-                            <td><input type="text" id="link_${service}" class="form-control" value="${channel.inviteLink || ''}" placeholder="https://t.me/joinchat/..." style="width: 100%; padding: 0.9rem; border-radius: 12px; border: 1px solid #ddd; font-size: 1.1rem;"></td>
-                        </tr>
-                    `;
+                    const ch = this.state.channels[service] || { username: '', inviteLink: '' };
+                    html += `<tr><td><i class="${this.serviceIcons[service]}"></i> ${this.serviceNames[service]}</td><td><input type="text" id="username_${service}" value="${ch.username || ''}" placeholder="@username" style="width:100%; padding:0.5rem; border-radius:0.5rem; border:1px solid #ddd;"></td><td><input type="text" id="link_${service}" value="${ch.inviteLink || ''}" placeholder="https://t.me/..." style="width:100%; padding:0.5rem; border-radius:0.5rem; border:1px solid #ddd;"></td></tr>`;
                 });
                 tbody.innerHTML = html;
                 document.getElementById('adminBotToken').value = this.state.botToken || '';
             }
             
             adminLogin() {
-                const pwd = document.getElementById('adminPassword').value;
-                if (pwd === ADMIN_PASSWORD) {
+                if (document.getElementById('adminPassword').value === ADMIN_PASSWORD) {
                     this.state.adminLoggedIn = true;
                     document.getElementById('adminLogin').style.display = 'none';
                     document.getElementById('adminContent').style.display = 'block';
-                    this.loadChannelsAndBotToken().then(() => {
-                        this.displayAdminChannels();
-                    });
-                    this.showAlert('تم تسجيل الدخول بنجاح', 'success');
-                } else {
-                    this.showAlert('كلمة السر خاطئة', 'error');
-                }
+                    this.loadChannelsAndBotToken().then(() => this.displayAdminChannels());
+                    this.showAlert('تم الدخول', 'success');
+                } else this.showAlert('كلمة السر خاطئة', 'error');
             }
             
             async saveChannels() {
                 const channels = {};
                 Object.keys(this.serviceNames).forEach(service => {
-                    const username = document.getElementById(`username_${service}`).value.trim();
-                    const inviteLink = document.getElementById(`link_${service}`).value.trim();
-                    channels[service] = { username, inviteLink };
+                    channels[service] = {
+                        username: document.getElementById(`username_${service}`).value.trim(),
+                        inviteLink: document.getElementById(`link_${service}`).value.trim()
+                    };
                 });
-                
                 const botToken = document.getElementById('adminBotToken').value.trim();
-                
-                this.showLoading('جاري حفظ الإعدادات...');
+                this.showLoading('جاري الحفظ...');
                 try {
-                    await this.callAppsScript('saveChannels', {
-                        channels: JSON.stringify(channels),
-                        botToken: botToken
-                    });
+                    await this.callAppsScript('saveChannels', { channels: JSON.stringify(channels), botToken });
                     this.state.channels = channels;
                     this.state.botToken = botToken;
                     this.hideLoading();
-                    this.showAlert('تم حفظ الإعدادات بنجاح', 'success');
+                    this.showAlert('تم الحفظ', 'success');
                     this.displayProviderChannels();
                 } catch (error) {
                     this.hideLoading();
-                    this.showAlert('فشل حفظ الإعدادات: ' + error.message, 'error');
+                    this.showAlert('فشل الحفظ', 'error');
                 }
             }
             
             async callAppsScript(action, data = {}) {
-                const url = this.config.API_BASE_URL;
-                const formData = new URLSearchParams();
-                formData.append('action', action);
-                for (let key in data) {
-                    if (data.hasOwnProperty(key)) {
-                        formData.append(key, data[key]);
-                    }
-                }
-                try {
-                    const response = await fetch(url, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                        body: formData
-                    });
-                    if (!response.ok) throw new Error('فشل الاتصال بالخادم');
-                    const result = await response.json();
-                    if (result.error) throw new Error(result.error);
-                    return result;
-                } catch (error) {
-                    console.error('API call error:', error);
-                    throw error;
-                }
+                const formData = new URLSearchParams({ action, ...data });
+                const res = await fetch(this.config.API_BASE_URL, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: formData });
+                if (!res.ok) throw new Error('Network error');
+                const result = await res.json();
+                if (result.error) throw new Error(result.error);
+                return result;
             }
             
             async loadChannelsAndBotToken() {
                 try {
-                    const result = await this.callAppsScript('getChannels');
-                    this.state.channels = result.channels || {};
-                    this.state.botToken = result.botToken || '';
-                } catch (error) {
-                    console.error('فشل تحميل القنوات:', error);
-                    this.state.channels = {};
-                    this.state.botToken = '';
-                }
+                    const res = await this.callAppsScript('getChannels');
+                    this.state.channels = res.channels || {};
+                    this.state.botToken = res.botToken || '';
+                } catch { this.state.channels = {}; this.state.botToken = ''; }
             }
             
             async loadOrdersFromSheet() {
                 try {
-                    const result = await this.callAppsScript('getOrders');
-                    this.state.orders = result.orders || [];
-                    this.state.orders = this.state.orders.map(o => {
-                        o.hidden = o.hidden === true || o.hidden === 'true';
-                        return o;
-                    });
+                    const res = await this.callAppsScript('getOrders');
+                    this.state.orders = (res.orders || []).map(o => ({ ...o, hidden: o.hidden === true || o.hidden === 'true' }));
                     this.cleanOldOrders();
                     this.state.takenOrders = this.state.orders.filter(o => o.status === 'taken' && o.takenBy === this.state.provider?.id);
                     this.saveToStorage('orders', this.state.orders);
                     this.saveToStorage('takenOrders', this.state.takenOrders);
                     this.updateDisplay();
-                } catch (error) {
-                    console.error('فشل تحميل الطلبات:', error);
+                } catch {
                     this.state.orders = this.getFromStorage('orders') || [];
                     this.state.takenOrders = this.getFromStorage('takenOrders') || [];
-                } finally {
-                    this.hideLoading();
-                }
+                } finally { this.hideLoading(); }
             }
             
             async saveOrdersToSheet() {
-                try {
-                    await this.callAppsScript('saveOrders', { orders: JSON.stringify(this.state.orders) });
-                } catch (error) {
-                    console.error('فشل حفظ الطلبات:', error);
-                }
+                try { await this.callAppsScript('saveOrders', { orders: JSON.stringify(this.state.orders) }); } catch {}
                 this.saveToStorage('orders', this.state.orders);
                 this.saveToStorage('takenOrders', this.state.takenOrders);
             }
             
             async sendBotNotifications(order) {
-                if (this.state.isFirstLoad) return;
-                if (!this.state.botToken) {
-                    console.log('لا يوجد توكن بوت عام مضبوط');
-                    return;
-                }
-                
-                const channel = this.state.channels[order.service];
-                if (!channel || !channel.username) {
-                    console.log('لا يوجد معرف قناة لهذه الخدمة:', order.service);
-                    return;
-                }
-                
-                const success = await this.sendTelegramMessage(this.state.botToken, channel.username, order);
-                if (!success) {
-                    this.showAlert(`فشل إرسال الإشعار للقناة (${this.serviceNames[order.service]}) - تحقق من التوكن ومعرف القناة`, 'warning');
-                }
+                if (this.state.isFirstLoad || !this.state.botToken) return;
+                const ch = this.state.channels[order.service];
+                if (!ch || !ch.username) return;
+                await this.sendTelegramMessage(this.state.botToken, ch.username, order);
             }
             
             async sendTelegramMessage(token, chatId, order) {
+                if (!chatId) return false;
+                const distance = this.calculateDistance(this.config.MAP_CENTER[0], this.config.MAP_CENTER[1], order.location.lat, order.location.lng).toFixed(1);
+                const msg = `♻ *طلب خدمة جديد*\n━━━━━━━━━━━━━━\n🔧 *الخدمة:* ${this.serviceNames[order.service]}\n📝 *التفاصيل:* ${order.details}\n📍 *الموقع:* ${order.location.address}\n📏 *المسافة:* ${distance} كم\n📞 *الرقم:* ${order.phone}\n👤 *الزبون:* ${order.customerName}\n🗺️ *الخريطة:* https://maps.google.com/?q=${order.location.lat},${order.location.lng}\n📱 *واتساب:* https://wa.me/${order.phone}`;
                 try {
-                    if (!chatId || chatId.trim() === '') {
-                        console.error('معرف القناة فارغ');
-                        return false;
-                    }
-                    
-                    const distance = this.calculateDistance(
-                        this.config.MAP_CENTER[0], this.config.MAP_CENTER[1],
-                        order.location.lat, order.location.lng
-                    ).toFixed(1);
-                    
-                    let message = `
-♻ *طلب خدمة جديد*
-━━━━━━━━━━━━━━
-🔧 *الخدمة:* ${this.serviceNames[order.service]}
-📝*التفاصيل:* ${order.details}
----------------------------------------------------
-📍 *الموقع:* ${order.location.address}
-📏 *المسافة من مركز إدلب:* ${distance} كم
-📞 *رقم الواتساب:* ${order.phone}
-👤 *الزبون:* ${order.customerName || 'غير محدد'}
-🗺️ *الخريطة:* https://maps.google.com/?q=${order.location.lat},${order.location.lng}
-📱 *رابط الواتساب:* https://wa.me/${order.phone}
-━━━━━━━━━━━━━━
-
-                    `;
-                    
-                    const url = `https://api.telegram.org/bot${token}/sendMessage`;
-                    const response = await fetch(url, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            chat_id: chatId,
-                            text: message,
-                            parse_mode: 'Markdown',
-                            reply_markup: {
-                                inline_keyboard: [
-                                    [
-                                        { text: '📞 واتساب', url: `https://wa.me/${order.phone}?text=مرحباً%20${order.customerName}` },
-                                        { text: '🗺️ الخريطة', url: `https://maps.google.com/?q=${order.location.lat},${order.location.lng}` }
-                                    ]
-                                ]
-                            }
-                        })
+                    const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ chat_id: chatId, text: msg, parse_mode: 'Markdown' })
                     });
-                    
-                    const result = await response.json();
-                    if (!result.ok) {
-                        console.error('خطأ تليجرام:', result);
-                        if (result.error_code === 400 && result.description.includes('chat not found')) {
-                            this.showAlert(`معرف القناة غير صحيح أو البوت ليس عضواً (${chatId})`, 'error');
-                        } else if (result.error_code === 401) {
-                            this.showAlert('توكن البوت غير صحيح', 'error');
-                        }
-                        return false;
-                    }
-                    return true;
-                } catch (error) {
-                    console.error('فشل إرسال إشعار تليجرام:', error);
-                    return false;
-                }
+                    return (await res.json()).ok;
+                } catch { return false; }
             }
             
             initMap() {
                 this.state.map = L.map('map').setView(this.config.MAP_CENTER, this.config.MAP_ZOOM);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '© OpenStreetMap'
-                }).addTo(this.state.map);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(this.state.map);
                 this.getUserLocation();
             }
             
@@ -1279,51 +1071,35 @@
                     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(this.state.locationPickerMap);
                     this.state.locationMarker = L.marker(this.config.MAP_CENTER, { draggable: true }).addTo(this.state.locationPickerMap);
                     this.state.locationMarker.on('dragend', (e) => {
-                        const position = e.target.getLatLng();
-                        this.state.selectedOrderLocation = {
-                            lat: position.lat,
-                            lng: position.lng,
-                            address: `موقع محدد: ${position.lat.toFixed(6)}, ${position.lng.toFixed(6)}`
-                        };
+                        const p = e.target.getLatLng();
+                        this.state.selectedOrderLocation = { lat: p.lat, lng: p.lng, address: `موقع: ${p.lat.toFixed(6)}, ${p.lng.toFixed(6)}` };
                     });
                     this.state.locationPickerMap.on('click', (e) => {
                         this.state.locationMarker.setLatLng(e.latlng);
-                        this.state.selectedOrderLocation = {
-                            lat: e.latlng.lat,
-                            lng: e.latlng.lng,
-                            address: `موقع محدد: ${e.latlng.lat.toFixed(6)}, ${e.latlng.lng.toFixed(6)}`
-                        };
+                        this.state.selectedOrderLocation = { lat: e.latlng.lat, lng: e.latlng.lng, address: `موقع: ${e.latlng.lat.toFixed(6)}, ${e.latlng.lng.toFixed(6)}` };
                     });
                 }
-                const initialLocation = this.state.currentPosition || { lat: this.config.MAP_CENTER[0], lng: this.config.MAP_CENTER[1] };
-                this.state.locationPickerMap.setView([initialLocation.lat, initialLocation.lng], 13);
-                this.state.locationMarker.setLatLng([initialLocation.lat, initialLocation.lng]);
-                this.state.selectedOrderLocation = { ...initialLocation, address: `موقع محدد: ${initialLocation.lat.toFixed(6)}, ${initialLocation.lng.toFixed(6)}` };
+                const initLoc = this.state.currentPosition || { lat: this.config.MAP_CENTER[0], lng: this.config.MAP_CENTER[1] };
+                this.state.locationPickerMap.setView([initLoc.lat, initLoc.lng], 13);
+                this.state.locationMarker.setLatLng([initLoc.lat, initLoc.lng]);
+                this.state.selectedOrderLocation = { ...initLoc, address: `موقع: ${initLoc.lat.toFixed(6)}, ${initLoc.lng.toFixed(6)}` };
             }
             
             getUserLocation() {
-                return new Promise((resolve) => {
-                    if (!navigator.geolocation) {
-                        this.updateLocationStatus('الموقع غير مدعوم');
-                        resolve(false);
-                        return;
-                    }
+                return new Promise(resolve => {
+                    if (!navigator.geolocation) { this.updateLocationStatus('غير مدعوم'); resolve(false); return; }
                     navigator.geolocation.getCurrentPosition(
-                        (position) => {
-                            this.state.currentPosition = {
-                                lat: position.coords.latitude,
-                                lng: position.coords.longitude,
-                                address: 'موقعك الحالي'
-                            };
+                        pos => {
+                            this.state.currentPosition = { lat: pos.coords.latitude, lng: pos.coords.longitude, address: 'موقعك الحالي' };
                             this.updateLocationStatus('الموقع: جاهز');
                             resolve(true);
                         },
-                        (error) => {
-                            let message = 'تعذر تحديد الموقع';
-                            if (error.code === error.PERMISSION_DENIED) message = 'تم رفض الإذن';
-                            else if (error.code === error.POSITION_UNAVAILABLE) message = 'الموقع غير متاح';
-                            else if (error.code === error.TIMEOUT) message = 'انتهت المهلة';
-                            this.updateLocationStatus(message);
+                        err => {
+                            let msg = 'تعذر';
+                            if (err.code === err.PERMISSION_DENIED) msg = 'تم الرفض';
+                            else if (err.code === err.POSITION_UNAVAILABLE) msg = 'غير متاح';
+                            else if (err.code === err.TIMEOUT) msg = 'انتهت المهلة';
+                            this.updateLocationStatus(msg);
                             resolve(false);
                         }, { enableHighAccuracy: true, timeout: 10000 }
                     );
@@ -1331,23 +1107,17 @@
             }
             
             updateLocationStatus(status) {
-                const element = document.getElementById('locationStatus');
-                if (element) {
-                    const span = element.querySelector('span');
-                    if (span) span.textContent = status;
-                }
+                const el = document.getElementById('locationStatus')?.querySelector('span');
+                if (el) el.textContent = status;
             }
             
             locateUser() {
-                this.getUserLocation().then(success => {
-                    if (success && this.state.map) {
+                this.getUserLocation().then(ok => {
+                    if (ok && this.state.map) {
                         this.state.map.setView([this.state.currentPosition.lat, this.state.currentPosition.lng], 13);
                         this.showAlert('تم تحديد موقعك', 'success');
                         this.updateDisplay();
-                    } else {
-                        this.showAlert('تعذر تحديد موقعك، حاول يدوياً', 'warning');
-                        this.showLocationPicker();
-                    }
+                    } else { this.showAlert('تعذر، حاول يدوياً', 'warning'); this.showLocationPicker(); }
                 });
             }
             
@@ -1357,23 +1127,14 @@
             }
             
             confirmLocation() {
-                if (!this.state.selectedOrderLocation) {
-                    this.showAlert('يرجى تحديد موقع', 'error');
-                    return;
-                }
+                if (!this.state.selectedOrderLocation) { this.showAlert('حدد موقعاً', 'error'); return; }
                 document.getElementById('locationPickerModal').classList.remove('active');
-                
-                const locationInfo = document.getElementById('orderLocationInfo');
-                if (locationInfo) {
-                    locationInfo.innerHTML = `
-                        <p><strong style="color: #28a745;">✓ تم تحديد الموقع يدوياً:</strong> ${this.state.selectedOrderLocation.address}</p>
-                        <button type="button" id="pickLocationBtn" class="btn-secondary">
-                            <i class="fas fa-map-pin"></i> تغيير الموقع
-                        </button>
-                    `;
+                const locInfo = document.getElementById('orderLocationInfo');
+                if (locInfo) {
+                    locInfo.innerHTML = `<p><strong style="color:#28a745;">✓ تم التحديد:</strong> ${this.state.selectedOrderLocation.address}</p><button type="button" id="pickLocationBtn" class="btn-secondary"><i class="fas fa-map-pin"></i> تغيير</button>`;
                     document.getElementById('pickLocationBtn').addEventListener('click', () => this.showLocationPicker());
                 }
-                this.showAlert('تم تحديد الموقع بنجاح', 'success');
+                this.showAlert('تم تحديد الموقع', 'success');
             }
             
             useCurrentLocationForPicker() {
@@ -1381,51 +1142,32 @@
                     this.state.locationPickerMap.setView([this.state.currentPosition.lat, this.state.currentPosition.lng], 13);
                     this.state.locationMarker.setLatLng([this.state.currentPosition.lat, this.state.currentPosition.lng]);
                     this.state.selectedOrderLocation = this.state.currentPosition;
-                    this.showAlert('تم استخدام موقعك الحالي', 'success');
+                    this.showAlert('تم استخدام موقعك', 'success');
                 } else {
-                    this.getUserLocation().then(success => {
-                        if (success) {
+                    this.getUserLocation().then(ok => {
+                        if (ok) {
                             this.state.locationPickerMap.setView([this.state.currentPosition.lat, this.state.currentPosition.lng], 13);
                             this.state.locationMarker.setLatLng([this.state.currentPosition.lat, this.state.currentPosition.lng]);
                             this.state.selectedOrderLocation = this.state.currentPosition;
-                            this.showAlert('تم استخدام موقعك الحالي', 'success');
+                            this.showAlert('تم استخدام موقعك', 'success');
                         }
                     });
                 }
             }
             
             showNewOrderModal() {
-                if (!this.state.user) {
-                    this.showAlert('يجب إكمال بيانات الزبون أولاً', 'error');
-                    this.showSection('customer');
-                    return;
-                }
+                if (!this.state.user) { this.showAlert('أكمل بيانات الزبون أولاً', 'error'); this.showSection('customer'); return; }
                 this.state.selectedOrderLocation = null;
-                const locationInfo = document.getElementById('orderLocationInfo');
-                if (locationInfo) {
+                const locInfo = document.getElementById('orderLocationInfo');
+                if (locInfo) {
                     if (this.state.currentPosition) {
-                        locationInfo.innerHTML = `
-                            <p>سيتم استخدام موقعك الحالي تلقائياً <span style="color: #6c757d;">(${this.state.currentPosition.address})</span></p>
-                            <button type="button" id="pickLocationBtn" class="btn-secondary">
-                                <i class="fas fa-map-pin"></i> تغيير الموقع
-                            </button>
-                        `;
+                        locInfo.innerHTML = `<p>سيتم استخدام موقعك الحالي <span style="color:#6c757d;">(${this.state.currentPosition.address})</span></p><button type="button" id="pickLocationBtn" class="btn-secondary"><i class="fas fa-map-pin"></i> تغيير</button>`;
                         document.getElementById('pickLocationBtn').addEventListener('click', () => this.showLocationPicker());
                     } else {
-                        locationInfo.innerHTML = `
-                            <p>جاري تحديد موقعك...</p>
-                            <button type="button" id="pickLocationBtn" class="btn-secondary">
-                                <i class="fas fa-map-pin"></i> تحديد الموقع يدوياً
-                            </button>
-                        `;
-                        this.getUserLocation().then(success => {
-                            if (success) {
-                                locationInfo.innerHTML = `
-                                    <p>سيتم استخدام موقعك الحالي تلقائياً <span style="color: #6c757d;">(${this.state.currentPosition.address})</span></p>
-                                    <button type="button" id="pickLocationBtn" class="btn-secondary">
-                                        <i class="fas fa-map-pin"></i> تغيير الموقع
-                                    </button>
-                                `;
+                        locInfo.innerHTML = `<p>جاري تحديد موقعك...</p><button type="button" id="pickLocationBtn" class="btn-secondary"><i class="fas fa-map-pin"></i> تحديد يدوياً</button>`;
+                        this.getUserLocation().then(ok => {
+                            if (ok) {
+                                locInfo.innerHTML = `<p>سيتم استخدام موقعك الحالي <span style="color:#6c757d;">(${this.state.currentPosition.address})</span></p><button type="button" id="pickLocationBtn" class="btn-secondary"><i class="fas fa-map-pin"></i> تغيير</button>`;
                                 document.getElementById('pickLocationBtn').addEventListener('click', () => this.showLocationPicker());
                             }
                         });
@@ -1437,55 +1179,26 @@
             
             async createOrder(e) {
                 e.preventDefault();
-                if (!this.state.user) {
-                    this.showAlert('يجب إكمال بيانات الزبون أولاً', 'error');
-                    this.showSection('customer');
-                    return;
-                }
-
+                if (!this.state.user) return;
                 if (!this.state.user.phone.startsWith('+963') || this.state.user.phone.length < 13) {
-                    this.showAlert('رقم الواتساب غير صحيح، يرجى تحديث بيانات الزبون', 'error');
-                    this.showSection('customer');
-                    return;
+                    this.showAlert('رقم الواتساب غير صحيح', 'error'); this.showSection('customer'); return;
                 }
-
                 const service = document.getElementById('orderService').value;
                 const details = document.getElementById('orderDetails').value;
-                if (!service || !details) {
-                    this.showAlert('يرجى تعبئة جميع الحقول', 'error');
-                    return;
-                }
+                if (!service || !details) { this.showAlert('املأ الحقول', 'error'); return; }
                 
-                let location;
-                if (this.state.selectedOrderLocation) {
-                    location = this.state.selectedOrderLocation;
-                } else if (this.state.currentPosition) {
-                    location = this.state.currentPosition;
-                } else {
-                    const { value: accept } = await Swal.fire({
-                        title: 'تحديد الموقع',
-                        text: 'لم يتم تحديد موقعك تلقائياً، هل تريد التحديد يدوياً؟',
-                        icon: 'info',
-                        showCancelButton: true,
-                        confirmButtonText: 'تحديد يدوياً',
-                        cancelButtonText: 'إلغاء'
-                    });
-                    if (accept) {
-                        this.showLocationPicker();
-                        return;
-                    } else {
-                        return;
-                    }
+                let location = this.state.selectedOrderLocation || this.state.currentPosition;
+                if (!location) {
+                    const { value: accept } = await Swal.fire({ title: 'تحديد الموقع', text: 'لم يتم تحديد موقع، حدد يدوياً؟', icon: 'info', showCancelButton: true, confirmButtonText: 'نعم', cancelButtonText: 'إلغاء' });
+                    if (accept) { this.showLocationPicker(); return; } else return;
                 }
                 
                 this.closeModals();
-                this.showLoading('جاري إرسال الطلب...');
+                this.showLoading('جاري الإرسال...');
                 
                 const order = {
                     id: 'order_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
-                    service,
-                    details,
-                    location,
+                    service, details, location,
                     phone: this.state.user.phone,
                     customerName: this.state.user.name,
                     userId: this.state.user.id,
@@ -1501,28 +1214,15 @@
                     this.addOrderToMap(order);
                     await this.saveOrdersToSheet();
                     await this.sendBotNotifications(order);
-                    
                     this.hideLoading();
-                    this.showAlert('تم إرسال الطلب بنجاح', 'success');
+                    this.showAlert('تم الإرسال', 'success');
                     document.getElementById('newOrderForm').reset();
                     this.state.selectedOrderLocation = null;
                     this.updateDisplay();
                 } catch (error) {
                     this.hideLoading();
-                    Swal.fire({
-                        title: 'فشل الإرسال',
-                        text: 'حدث خطأ في الاتصال. هل تريد إعادة المحاولة؟',
-                        icon: 'error',
-                        showCancelButton: true,
-                        confirmButtonText: 'إعادة المحاولة',
-                        cancelButtonText: 'إلغاء'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            this.showNewOrderModal();
-                            document.getElementById('orderService').value = service;
-                            document.getElementById('orderDetails').value = details;
-                            this.state.selectedOrderLocation = location;
-                        }
+                    Swal.fire({ title: 'فشل', text: 'أعد المحاولة؟', icon: 'error', showCancelButton: true }).then(r => {
+                        if (r.isConfirmed) { this.showNewOrderModal(); document.getElementById('orderService').value = service; document.getElementById('orderDetails').value = details; this.state.selectedOrderLocation = location; }
                     });
                 }
             }
@@ -1531,11 +1231,8 @@
                 const marker = L.marker([order.location.lat, order.location.lng], {
                     icon: L.divIcon({
                         className: 'order-marker',
-                        html: `<div style="background: ${this.getStatusColor(order.status)}; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; border: 3px solid white; box-shadow: 0 0 20px rgba(0,0,0,0.4);">
-                                 <i class="${this.serviceIcons[order.service]}" style="font-size: 20px;"></i>
-                               </div>`,
-                        iconSize: [45, 45],
-                        iconAnchor: [22.5, 22.5]
+                        html: `<div style="background:${this.getStatusColor(order.status)}; width:2.5rem; height:2.5rem; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; border:2px solid white; box-shadow:0 2px 8px rgba(0,0,0,0.3);"><i class="${this.serviceIcons[order.service]}" style="font-size:1.2rem;"></i></div>`,
+                        iconSize: [40,40], iconAnchor: [20,20]
                     })
                 }).addTo(this.state.map);
                 marker.bindPopup(this.createPopup(order));
@@ -1545,314 +1242,147 @@
             
             cleanOldOrders() {
                 const now = Date.now();
-                this.state.orders = this.state.orders.filter(order => {
-                    const orderTime = new Date(order.timestamp).getTime();
-                    const age = now - orderTime;
-                    if ((order.status === 'completed' || order.status === 'cancelled') && age > 2 * 60 * 1000) return false;
-                    if (order.status === 'new' && age > this.config.ORDER_TIMEOUT) return false;
-                    if (order.status === 'taken') {
-                        const takenAge = now - (order.takenAt || orderTime);
-                        order.hidden = takenAge > this.config.TAKEN_TIMEOUT;
-                    }
+                this.state.orders = this.state.orders.filter(o => {
+                    const t = new Date(o.timestamp).getTime();
+                    const age = now - t;
+                    if ((o.status === 'completed' || o.status === 'cancelled') && age > 2*60*1000) return false;
+                    if (o.status === 'new' && age > this.config.ORDER_TIMEOUT) return false;
+                    if (o.status === 'taken') { o.hidden = (now - (o.takenAt || t)) > this.config.TAKEN_TIMEOUT; }
                     return true;
                 });
             }
             
             updateMap() {
-                Object.values(this.state.markers).forEach(m => m && m.remove());
+                Object.values(this.state.markers).forEach(m => m?.remove());
                 this.state.markers = {};
-                const serviceFilter = document.getElementById('serviceFilter').value;
-                this.state.lastFilter = serviceFilter;
-                this.state.orders.forEach(order => {
-                    if (!order.location || order.status === 'completed' || order.status === 'cancelled' || order.hidden) return;
-                    if (serviceFilter === 'all' || order.service === serviceFilter) {
-                        const marker = L.marker([order.location.lat, order.location.lng], {
-                            icon: L.divIcon({
-                                className: 'order-marker',
-                                html: `<div style="background: ${this.getStatusColor(order.status)}; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; border: 3px solid white; box-shadow: 0 0 20px rgba(0,0,0,0.4);">
-                                         <i class="${this.serviceIcons[order.service]}" style="font-size: 20px;"></i>
-                                       </div>`,
-                                iconSize: [45, 45],
-                                iconAnchor: [22.5, 22.5]
-                            })
-                        }).addTo(this.state.map);
-                        marker.bindPopup(this.createPopup(order));
-                        marker.on('click', () => this.viewOrder(order.id));
-                        this.state.markers[order.id] = marker;
-                    }
+                const filter = document.getElementById('serviceFilter').value;
+                this.state.orders.forEach(o => {
+                    if (!o.location || o.status === 'completed' || o.status === 'cancelled' || o.hidden) return;
+                    if (filter === 'all' || o.service === filter) this.addOrderToMap(o);
                 });
             }
             
-            getStatusColor(status) {
-                return { new: '#4361ee', taken: '#f8961e', completed: '#4cc9f0', cancelled: '#f94144' } [status] || '#4361ee';
-            }
+            getStatusColor(s) { return { new: '#4361ee', taken: '#f8961e', completed: '#4cc9f0', cancelled: '#f94144' }[s] || '#4361ee'; }
             
-            createPopup(order) {
-                const distance = this.state.currentPosition ?
-                    this.calculateDistance(this.state.currentPosition.lat, this.state.currentPosition.lng, order.location.lat, order.location.lng).toFixed(1) : 'غير معروف';
-                return `
-                    <div style="padding: 15px; max-width: 320px; font-size: 1rem;">
-                        <h4 style="margin: 0 0 10px; color: #6a11cb; font-size: 1.3rem;"><i class="${this.serviceIcons[order.service]}"></i> ${this.serviceNames[order.service]}</h4>
-                        <p><strong>الحالة:</strong> ${this.getStatusText(order.status)}</p>
-                        <p><strong>المسافة:</strong> ${distance} كم</p>
-                        <p><strong>رقم التواصل:</strong> ${order.phone}</p>
-                        <p><strong>التفاصيل:</strong> ${order.details.substring(0, 60)}...</p>
-                        <button onclick="app.viewOrder('${order.id}')" style="background: #6a11cb; color: white; border: none; padding: 10px 18px; border-radius: 10px; width: 100%; font-weight: bold; font-size: 1rem; cursor: pointer;">عرض التفاصيل</button>
-                    </div>
-                `;
+            createPopup(o) {
+                const dist = this.state.currentPosition ? this.calculateDistance(this.state.currentPosition.lat, this.state.currentPosition.lng, o.location.lat, o.location.lng).toFixed(1) : '?';
+                return `<div style="padding:0.5rem; max-width:250px;"><h4 style="margin:0 0 0.5rem; color:#6a11cb;"><i class="${this.serviceIcons[o.service]}"></i> ${this.serviceNames[o.service]}</h4><p><strong>الحالة:</strong> ${this.getStatusText(o.status)}</p><p><strong>المسافة:</strong> ${dist} كم</p><p><strong>رقم:</strong> ${o.phone}</p><p><strong>التفاصيل:</strong> ${o.details.substring(0,50)}...</p><button onclick="app.viewOrder('${o.id}')" style="background:#6a11cb; color:white; border:none; padding:0.5rem; border-radius:2rem; width:100%;">عرض</button></div>`;
             }
             
             updateNearbyOrders() {
-                const container = document.getElementById('nearbyOrders');
-                if (!container) return;
-                if (!this.state.currentPosition) {
-                    container.innerHTML = '<p style="text-align: center; font-size: 1.2rem;">تحديد الموقع غير متاح</p>';
-                    return;
-                }
-                const serviceFilter = document.getElementById('serviceFilter').value;
-                let nearbyOrders = this.state.orders.filter(o => o.status === 'new' && !o.hidden && (serviceFilter === 'all' || o.service === serviceFilter) && o.location);
-                nearbyOrders.forEach(o => o.distance = this.calculateDistance(this.state.currentPosition.lat, this.state.currentPosition.lng, o.location.lat, o.location.lng));
-                nearbyOrders = nearbyOrders.filter(o => o.distance <= this.config.NEARBY_DISTANCE).sort((a, b) => a.distance - b.distance);
-                if (nearbyOrders.length === 0) {
-                    container.innerHTML = '<p style="text-align: center; font-size: 1.2rem;">لا توجد طلبات قريبة ضمن 2 كم</p>';
-                    return;
-                }
-                container.innerHTML = nearbyOrders.map(order => `
-                    <div class="order-item" data-id="${order.id}">
-                        <div class="order-item-header">
-                            <span class="order-item-service"><i class="${this.serviceIcons[order.service]}"></i> ${this.serviceNames[order.service]}</span>
-                            <span class="order-item-status status-new">جديد</span>
-                        </div>
-                        <div class="order-item-details">${order.details.substring(0, 100)}...</div>
-                        <div class="order-item-footer">
-                            <span><i class="fas fa-map-marker-alt"></i> ${order.distance.toFixed(1)} كم</span>
-                            <div class="order-item-actions">
-                                <button class="btn-secondary" onclick="app.viewOrder('${order.id}')"><i class="fas fa-eye"></i></button>
-                                ${this.state.provider ? `<button class="btn-success" onclick="app.takeOrder('${order.id}')"><i class="fas fa-hand-paper"></i></button>` : ''}
-                            </div>
-                        </div>
-                    </div>
-                `).join('');
+                const cont = document.getElementById('nearbyOrders');
+                if (!cont || !this.state.currentPosition) { cont.innerHTML = '<p style="text-align:center;">الموقع غير متاح</p>'; return; }
+                const filter = document.getElementById('serviceFilter').value;
+                let list = this.state.orders.filter(o => o.status === 'new' && !o.hidden && (filter === 'all' || o.service === filter) && o.location);
+                list.forEach(o => o.distance = this.calculateDistance(this.state.currentPosition.lat, this.state.currentPosition.lng, o.location.lat, o.location.lng));
+                list = list.filter(o => o.distance <= this.config.NEARBY_DISTANCE).sort((a,b) => a.distance - b.distance);
+                if (!list.length) { cont.innerHTML = '<p style="text-align:center;">لا توجد طلبات قريبة ضمن 2 كم</p>'; return; }
+                cont.innerHTML = list.map(o => `<div class="order-item"><div class="order-item-header"><span class="order-item-service"><i class="${this.serviceIcons[o.service]}"></i> ${this.serviceNames[o.service]}</span><span class="order-item-status status-new">جديد</span></div><div class="order-item-details">${o.details.substring(0,80)}...</div><div class="order-item-footer"><span><i class="fas fa-map-marker-alt"></i> ${o.distance.toFixed(1)} كم</span><div class="order-item-actions"><button class="btn-secondary" onclick="app.viewOrder('${o.id}')"><i class="fas fa-eye"></i></button>${this.state.provider ? `<button class="btn-success" onclick="app.takeOrder('${o.id}')"><i class="fas fa-hand-paper"></i></button>` : ''}</div></div></div>`).join('');
             }
             
             updateSuggestedOrders() {
-                const container = document.getElementById('suggestedOrders');
-                if (!container) return;
-                if (!this.state.currentPosition) {
-                    container.innerHTML = '';
-                    return;
-                }
-                const serviceFilter = document.getElementById('serviceFilter').value;
-                let suggested = this.state.orders.filter(o => 
-                    o.status === 'new' && !o.hidden && 
-                    (serviceFilter !== 'all' ? o.service !== serviceFilter : true) && 
-                    o.location
-                );
-                suggested.forEach(o => o.distance = this.calculateDistance(this.state.currentPosition.lat, this.state.currentPosition.lng, o.location.lat, o.location.lng));
-                suggested = suggested.filter(o => o.distance <= this.config.NEARBY_DISTANCE).sort((a, b) => a.distance - b.distance).slice(0, 4);
-                
-                if (suggested.length === 0) {
-                    container.innerHTML = '<p style="text-align: center; color: #888; font-size: 1.2rem;">لا توجد خدمات أخرى قريبة ضمن 2 كم</p>';
-                    return;
-                }
-                container.innerHTML = suggested.map(order => `
-                    <div class="order-item" data-id="${order.id}" style="border-right-color: #f39c12;">
-                        <div class="order-item-header">
-                            <span class="order-item-service"><i class="${this.serviceIcons[order.service]}"></i> ${this.serviceNames[order.service]}</span>
-                            <span class="order-item-status status-new">جديد</span>
-                        </div>
-                        <div class="order-item-details">${order.details.substring(0, 80)}...</div>
-                        <div class="order-item-footer">
-                            <span><i class="fas fa-map-marker-alt"></i> ${order.distance.toFixed(1)} كم</span>
-                            <div class="order-item-actions">
-                                <button class="btn-secondary" onclick="app.viewOrder('${order.id}')"><i class="fas fa-eye"></i></button>
-                            </div>
-                        </div>
-                    </div>
-                `).join('');
+                const cont = document.getElementById('suggestedOrders');
+                if (!cont || !this.state.currentPosition) { cont.innerHTML = ''; return; }
+                const filter = document.getElementById('serviceFilter').value;
+                let list = this.state.orders.filter(o => o.status === 'new' && !o.hidden && (filter !== 'all' ? o.service !== filter : true) && o.location);
+                list.forEach(o => o.distance = this.calculateDistance(this.state.currentPosition.lat, this.state.currentPosition.lng, o.location.lat, o.location.lng));
+                list = list.filter(o => o.distance <= this.config.NEARBY_DISTANCE).sort((a,b) => a.distance - b.distance).slice(0,4);
+                if (!list.length) { cont.innerHTML = '<p style="text-align:center; color:#888;">لا توجد اقتراحات</p>'; return; }
+                cont.innerHTML = list.map(o => `<div class="order-item" style="border-right-color:#f39c12;"><div class="order-item-header"><span class="order-item-service"><i class="${this.serviceIcons[o.service]}"></i> ${this.serviceNames[o.service]}</span><span class="order-item-status status-new">جديد</span></div><div class="order-item-details">${o.details.substring(0,60)}...</div><div class="order-item-footer"><span><i class="fas fa-map-marker-alt"></i> ${o.distance.toFixed(1)} كم</span><button class="btn-secondary" onclick="app.viewOrder('${o.id}')"><i class="fas fa-eye"></i></button></div></div>`).join('');
             }
             
-            async takeOrder(orderId) {
-                if (!this.state.provider) {
-                    this.showAlert('يجب إكمال إعدادات مقدم الخدمة أولاً', 'error');
-                    this.showSection('provider');
-                    return;
-                }
-                const order = this.state.orders.find(o => o.id === orderId);
-                if (!order || order.status !== 'new') {
-                    this.showAlert('الطلب غير متاح', 'warning');
-                    return;
-                }
-                order.status = 'taken';
-                order.takenBy = this.state.provider.id;
-                order.takenAt = Date.now();
-                order.takenByName = this.state.provider.name;
-                order.hidden = false;
-                this.state.takenOrders.push(order);
+            async takeOrder(id) {
+                if (!this.state.provider) { this.showAlert('أكمل إعدادات مقدم الخدمة', 'error'); this.showSection('provider'); return; }
+                const o = this.state.orders.find(x => x.id === id);
+                if (!o || o.status !== 'new') { this.showAlert('الطلب غير متاح', 'warning'); return; }
+                o.status = 'taken'; o.takenBy = this.state.provider.id; o.takenAt = Date.now(); o.takenByName = this.state.provider.name; o.hidden = false;
+                this.state.takenOrders.push(o);
                 await this.saveOrdersToSheet();
                 this.updateDisplay();
                 this.showAlert('تم أخذ الطلب', 'success');
-                this.sendWhatsAppNotification(order, 'taken');
+                if (o.phone) window.open(`https://wa.me/${o.phone}?text=مرحباً ${o.customerName}، ${o.takenByName} قام بأخذ طلبك وسيتواصل معك قريباً.`, '_blank');
             }
             
-            async cancelOrder(orderId) {
-                const order = this.state.orders.find(o => o.id === orderId);
-                if (!order) return;
-                if (order.status === 'taken' && order.takenBy === this.state.provider?.id) {
-                    order.status = 'new';
-                    order.takenBy = null;
-                    order.takenAt = null;
-                    order.takenByName = null;
-                    order.hidden = false;
-                    this.state.takenOrders = this.state.takenOrders.filter(o => o.id !== orderId);
-                } else if (order.userId === this.state.user?.id) {
-                    order.status = 'cancelled';
-                }
+            async cancelOrder(id) {
+                const o = this.state.orders.find(x => x.id === id);
+                if (!o) return;
+                if (o.status === 'taken' && o.takenBy === this.state.provider?.id) {
+                    o.status = 'new'; o.takenBy = null; o.takenAt = null; o.takenByName = null; o.hidden = false;
+                    this.state.takenOrders = this.state.takenOrders.filter(x => x.id !== id);
+                } else if (o.userId === this.state.user?.id) o.status = 'cancelled';
                 await this.saveOrdersToSheet();
                 this.updateDisplay();
                 this.showAlert('تم الإلغاء', 'warning');
             }
             
-            async completeOrder(orderId) {
-                const order = this.state.orders.find(o => o.id === orderId);
-                if (!order) return;
-                order.status = 'completed';
-                order.completedAt = Date.now();
-                this.state.takenOrders = this.state.takenOrders.filter(o => o.id !== orderId);
+            async completeOrder(id) {
+                const o = this.state.orders.find(x => x.id === id);
+                if (!o) return;
+                o.status = 'completed'; o.completedAt = Date.now();
+                this.state.takenOrders = this.state.takenOrders.filter(x => x.id !== id);
                 await this.saveOrdersToSheet();
                 this.updateDisplay();
-                this.showAlert('تم إكمال الطلب', 'success');
+                this.showAlert('تم الإكمال', 'success');
             }
             
-            sendWhatsAppNotification(order, action) {
-                if (!order.phone) return;
-                if (action === 'taken' && order.takenByName) {
-                    const msg = `مرحباً ${order.customerName}، ${order.takenByName} قام بأخذ طلبك وسيتواصل معك قريباً.`;
-                    window.open(`https://wa.me/${order.phone}?text=${encodeURIComponent(msg)}`, '_blank');
-                }
-            }
-            
-            filterOrders(service) {
-                this.updateMap();
-                this.updateNearbyOrders();
-                this.updateSuggestedOrders();
-            }
-            
-            saveFilterPreference() {
-                const filter = document.getElementById('serviceFilter').value;
-                this.saveToStorage('filter', filter);
-            }
-            
-            loadFilterPreference() {
-                const saved = this.getFromStorage('filter') || 'all';
-                document.getElementById('serviceFilter').value = saved;
-                this.state.lastFilter = saved;
-            }
-            
-            updateDisplay() {
-                this.updateMap();
-                this.updateNearbyOrders();
-                this.updateSuggestedOrders();
-                this.renderMyOrders();
-                this.renderTakenOrders();
-            }
+            filterOrders(s) { this.updateMap(); this.updateNearbyOrders(); this.updateSuggestedOrders(); }
+            saveFilterPreference() { this.saveToStorage('filter', document.getElementById('serviceFilter').value); }
+            loadFilterPreference() { document.getElementById('serviceFilter').value = this.getFromStorage('filter') || 'all'; }
+            updateDisplay() { this.updateMap(); this.updateNearbyOrders(); this.updateSuggestedOrders(); this.renderMyOrders(); this.renderTakenOrders(); }
             
             showUnakenOrdersOnMap() {
-                const unaken = this.state.orders.filter(o => o.status === 'new' && o.location);
-                if (unaken.length > 0) {
-                    const totalLat = unaken.reduce((s, o) => s + o.location.lat, 0) / unaken.length;
-                    const totalLng = unaken.reduce((s, o) => s + o.location.lng, 0) / unaken.length;
-                    this.state.map.setView([totalLat, totalLng], 11);
-                    this.showAlert(`يوجد ${unaken.length} طلب غير مأخوذ`, 'info');
+                const u = this.state.orders.filter(o => o.status === 'new' && o.location);
+                if (u.length) {
+                    const lat = u.reduce((s,o)=>s+o.location.lat,0)/u.length;
+                    const lng = u.reduce((s,o)=>s+o.location.lng,0)/u.length;
+                    this.state.map.setView([lat,lng], 11);
+                    this.showAlert(`يوجد ${u.length} طلب غير مأخوذ`, 'info');
                 }
             }
             
             startAutoUpdate() {
                 if (this.state.updateTimer) clearInterval(this.state.updateTimer);
                 this.state.updateTimer = setInterval(async () => {
-                    const currentOrders = [...this.state.orders];
+                    const old = [...this.state.orders];
                     await this.loadOrdersFromSheet();
-                    if (!this.state.isFirstLoad && currentOrders.length > 0) {
-                        this.checkForNewOrdersOnly(currentOrders);
-                    }
+                    if (!this.state.isFirstLoad && old.length) this.checkForNewOrdersOnly(old);
                     this.updateAppStatus('آخر تحديث: ' + new Date().toLocaleTimeString('ar-SA'));
                 }, this.config.UPDATE_INTERVAL);
             }
             
-            checkForNewOrdersOnly(oldOrders) {
+            checkForNewOrdersOnly(old) {
                 if (!this.state.provider) return;
-                const oldIds = new Set(oldOrders.map(o => o.id));
-                const oldNewIds = new Set(oldOrders.filter(o => o.status === 'new').map(o => o.id));
-                const newOrders = this.state.orders.filter(o => o.status === 'new' && !oldIds.has(o.id));
-                const reactivated = this.state.orders.filter(o => o.status === 'new' && oldIds.has(o.id) && !oldNewIds.has(o.id) && !this.state.newOrdersCheck.includes(o.id));
-                [...newOrders, ...reactivated].forEach(order => {
-                    this.sendBotNotifications(order);
-                    if (!this.state.newOrdersCheck.includes(order.id)) {
-                        this.state.newOrdersCheck.push(order.id);
-                    }
-                });
-                if (newOrders.length || reactivated.length) {
-                    this.showAlert(`تم إضافة ${newOrders.length + reactivated.length} طلب جديد`, 'success');
-                    this.saveToStorage('newOrdersCheck', this.state.newOrdersCheck);
-                }
+                const oldIds = new Set(old.map(o=>o.id));
+                const oldNewIds = new Set(old.filter(o=>o.status==='new').map(o=>o.id));
+                const newOrders = this.state.orders.filter(o=>o.status==='new' && !oldIds.has(o.id));
+                const react = this.state.orders.filter(o=>o.status==='new' && oldIds.has(o.id) && !oldNewIds.has(o.id) && !this.state.newOrdersCheck.includes(o.id));
+                [...newOrders, ...react].forEach(o => { this.sendBotNotifications(o); if (!this.state.newOrdersCheck.includes(o.id)) this.state.newOrdersCheck.push(o.id); });
+                if (newOrders.length || react.length) { this.showAlert(`تم إضافة ${newOrders.length+react.length} طلب جديد`, 'success'); this.saveToStorage('newOrdersCheck', this.state.newOrdersCheck); }
             }
             
-            showSection(section) {
+            showSection(s) {
                 document.querySelectorAll('.content-section').forEach(el => el.classList.remove('active'));
                 document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-                document.getElementById(section + 'Section').classList.add('active');
-                document.getElementById(section + 'Btn').classList.add('active');
-                if (section === 'home') {
-                    setTimeout(() => this.state.map?.invalidateSize(), 100);
-                    this.updateDisplay();
-                } else if (section === 'customer') {
-                    this.renderMyOrders();
-                } else if (section === 'provider') {
-                    this.renderTakenOrders();
-                    this.displayProviderChannels();
-                } else if (section === 'admin') {
-                    if (this.state.adminLoggedIn) {
-                        document.getElementById('adminLogin').style.display = 'none';
-                        document.getElementById('adminContent').style.display = 'block';
-                        this.displayAdminChannels();
-                    } else {
-                        document.getElementById('adminLogin').style.display = 'block';
-                        document.getElementById('adminContent').style.display = 'none';
-                        document.getElementById('adminPassword').value = '';
-                    }
+                document.getElementById(s + 'Section').classList.add('active');
+                document.getElementById(s + 'Btn').classList.add('active');
+                if (s === 'home') { setTimeout(() => this.state.map?.invalidateSize(), 100); this.updateDisplay(); }
+                else if (s === 'customer') this.renderMyOrders();
+                else if (s === 'provider') { this.renderTakenOrders(); this.displayProviderChannels(); }
+                else if (s === 'admin') {
+                    if (this.state.adminLoggedIn) { document.getElementById('adminLogin').style.display = 'none'; document.getElementById('adminContent').style.display = 'block'; this.displayAdminChannels(); }
+                    else { document.getElementById('adminLogin').style.display = 'block'; document.getElementById('adminContent').style.display = 'none'; document.getElementById('adminPassword').value = ''; }
                 }
             }
             
-            showModal(modalId) {
-                document.getElementById(modalId).classList.add('active');
-            }
+            showModal(id) { document.getElementById(id).classList.add('active'); }
+            closeModals() { document.querySelectorAll('.modal').forEach(m => m.classList.remove('active')); }
+            showAlert(msg, type='info') { Swal.fire({ title: msg, icon: type, timer: 2000, toast: true, position: 'top-end', showConfirmButton: false }); }
             
-            closeModals() {
-                document.querySelectorAll('.modal').forEach(m => m.classList.remove('active'));
-            }
-            
-            showAlert(message, type = 'info') {
-                Swal.fire({ title: message, icon: type, timer: 3000, toast: true, position: 'top-end', showConfirmButton: false });
-            }
-            
-            viewOrder(orderId) {
-                const order = this.state.orders.find(o => o.id === orderId);
-                if (!order) return;
+            viewOrder(id) {
+                const o = this.state.orders.find(x => x.id === id);
+                if (!o) return;
                 const content = document.getElementById('orderDetailsContent');
-                content.innerHTML = `
-                    <div style="padding: 15px;">
-                        <h4 style="color: #6a11cb; font-size: 1.5rem;"><i class="${this.serviceIcons[order.service]}"></i> ${this.serviceNames[order.service]}</h4>
-                        <p><strong>التفاصيل:</strong> ${order.details}</p>
-                        <p><strong>الموقع:</strong> ${order.location.address}</p>
-                        <p><strong>الزبون:</strong> ${order.customerName} - <a href="https://wa.me/${order.phone}" target="_blank">${order.phone}</a></p>
-                        <p><strong>الحالة:</strong> ${this.getStatusText(order.status)}</p>
-                        <div style="display: flex; gap: 15px; margin-top: 25px;">
-                            ${order.status === 'new' && this.state.provider ? `<button onclick="app.takeOrder('${order.id}')" class="btn-primary">أخذ الطلب</button>` : ''}
-                            ${(order.status === 'taken' && order.takenBy === this.state.provider?.id) ? `<button onclick="app.completeOrder('${order.id}')" class="btn-success">إكمال</button><button onclick="app.cancelOrder('${order.id}')" class="btn-danger">إلغاء</button>` : ''}
-                            ${order.userId === this.state.user?.id && order.status === 'new' ? `<button onclick="app.cancelOrder('${order.id}')" class="btn-danger">إلغاء</button>` : ''}
-                        </div>
-                    </div>
-                `;
+                content.innerHTML = `<div><h4 style="color:#6a11cb;"><i class="${this.serviceIcons[o.service]}"></i> ${this.serviceNames[o.service]}</h4><p><strong>التفاصيل:</strong> ${o.details}</p><p><strong>الموقع:</strong> ${o.location.address}</p><p><strong>الزبون:</strong> ${o.customerName} - <a href="https://wa.me/${o.phone}" target="_blank">${o.phone}</a></p><p><strong>الحالة:</strong> ${this.getStatusText(o.status)}</p><div style="display:flex; gap:0.8rem; margin-top:1.5rem;">${o.status==='new' && this.state.provider ? `<button onclick="app.takeOrder('${o.id}')" class="btn-primary">أخذ الطلب</button>` : ''}${o.status==='taken' && o.takenBy === this.state.provider?.id ? `<button onclick="app.completeOrder('${o.id}')" class="btn-success">إكمال</button><button onclick="app.cancelOrder('${o.id}')" class="btn-danger">إلغاء</button>` : ''}${o.userId === this.state.user?.id && o.status === 'new' ? `<button onclick="app.cancelOrder('${o.id}')" class="btn-danger">إلغاء</button>` : ''}</div></div>`;
                 this.showModal('orderDetailsModal');
             }
             
@@ -1860,100 +1390,45 @@
                 e.preventDefault();
                 const name = document.getElementById('customerName').value;
                 const phone = document.getElementById('customerPhone').value;
-                if (!name || !phone) {
-                    this.showAlert('يرجى تعبئة الحقول', 'error');
-                    return;
-                }
-                if (!phone.startsWith('+963') || phone.length < 13) {
-                    this.showAlert('رقم الواتساب يجب أن يبدأ بـ +963 ويتكون من 13 رقم (مثال: +963912345678)', 'error');
-                    return;
-                }
-                this.state.user = { id: 'user_' + Date.now(), name, phone, createdAt: new Date().toISOString() };
+                if (!name || !phone) { this.showAlert('املأ الحقول', 'error'); return; }
+                if (!phone.startsWith('+963') || phone.length < 13) { this.showAlert('رقم غير صحيح', 'error'); return; }
+                this.state.user = { id: 'user_'+Date.now(), name, phone, createdAt: new Date().toISOString() };
                 this.saveToStorage('user', this.state.user);
-                this.showAlert('تم حفظ بيانات الزبون', 'success');
+                this.showAlert('تم الحفظ', 'success');
                 this.renderMyOrders();
             }
             
             async saveProvider(e) {
                 e.preventDefault();
                 const name = document.getElementById('providerName').value;
-                const services = [];
-                document.querySelectorAll('input[name="services"]:checked').forEach(cb => services.push(cb.value));
-                if (!name || services.length === 0) {
-                    this.showAlert('يرجى تعبئة الحقول المطلوبة', 'error');
-                    return;
-                }
-                
-                this.state.provider = {
-                    id: 'provider_' + Date.now(),
-                    name,
-                    services,
-                    createdAt: new Date().toISOString()
-                };
+                const services = Array.from(document.querySelectorAll('input[name="services"]:checked')).map(cb=>cb.value);
+                if (!name || !services.length) { this.showAlert('املأ الحقول', 'error'); return; }
+                this.state.provider = { id: 'provider_'+Date.now(), name, services, createdAt: new Date().toISOString() };
                 this.saveToStorage('provider', this.state.provider);
-                
                 this.resetNewOrdersCheck();
-                this.showAlert('تم حفظ إعدادات مقدم الخدمة', 'success');
+                this.showAlert('تم الحفظ', 'success');
                 this.renderTakenOrders();
                 this.displayProviderChannels();
             }
             
             renderMyOrders() {
-                const container = document.getElementById('myOrdersList');
-                if (!container) return;
-                const myOrders = this.state.orders.filter(o => o.userId === this.state.user?.id).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-                if (myOrders.length === 0) {
-                    container.innerHTML = '<p style="text-align: center; font-size: 1.2rem;">لا توجد طلبات</p>';
-                    return;
-                }
-                container.innerHTML = myOrders.map(order => `
-                    <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 18px; margin-bottom: 1.5rem; border-right: 8px solid ${this.getStatusColor(order.status)}; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                            <strong style="font-size: 1.3rem;"><i class="${this.serviceIcons[order.service]}"></i> ${this.serviceNames[order.service]}</strong>
-                            <span style="background: ${this.getStatusColor(order.status)}20; color: ${this.getStatusColor(order.status)}; padding: 0.5rem 1.5rem; border-radius: 40px; font-size: 1rem; font-weight: 700;">${this.getStatusText(order.status)}</span>
-                        </div>
-                        <p style="color: #555; margin-bottom: 0.8rem; font-size: 1.1rem;">${order.details.substring(0, 100)}...</p>
-                        <small style="color: #888; font-size: 1rem;">${new Date(order.timestamp).toLocaleString('ar-SA')}</small>
-                    </div>
-                `).join('');
+                const cont = document.getElementById('myOrdersList');
+                if (!cont) return;
+                const list = this.state.orders.filter(o => o.userId === this.state.user?.id).sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp));
+                if (!list.length) { cont.innerHTML = '<p style="text-align:center;">لا توجد طلبات</p>'; return; }
+                cont.innerHTML = list.map(o => `<div style="background:#f8f9fa; padding:1rem; border-radius:1rem; margin-bottom:1rem; border-right:0.3rem solid ${this.getStatusColor(o.status)};"><div style="display:flex; justify-content:space-between; align-items:center;"><strong><i class="${this.serviceIcons[o.service]}"></i> ${this.serviceNames[o.service]}</strong><span style="background:${this.getStatusColor(o.status)}20; color:${this.getStatusColor(o.status)}; padding:0.2rem 1rem; border-radius:2rem; font-size:0.85rem;">${this.getStatusText(o.status)}</span></div><p style="margin:0.5rem 0;">${o.details.substring(0,80)}...</p><small>${new Date(o.timestamp).toLocaleString('ar-SA')}</small></div>`).join('');
             }
             
             renderTakenOrders() {
-                const container = document.getElementById('takenOrdersList');
-                if (!container) return;
-                if (this.state.takenOrders.length === 0) {
-                    container.innerHTML = '<p style="text-align: center; font-size: 1.2rem;">لا توجد طلبات مأخوذة</p>';
-                    return;
-                }
-                container.innerHTML = this.state.takenOrders.map(order => `
-                    <div style="background: #fff3e0; padding: 1.5rem; border-radius: 18px; margin-bottom: 1.5rem; border-right: 8px solid #f8961e; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-                        <strong style="font-size: 1.3rem;"><i class="${this.serviceIcons[order.service]}"></i> ${this.serviceNames[order.service]}</strong>
-                        <p style="color: #555; margin: 1rem 0; font-size: 1.1rem;">${order.details.substring(0, 100)}...</p>
-                        <p style="font-size: 1.1rem;">الزبون: <a href="https://wa.me/${order.phone}" target="_blank">${order.phone}</a></p>
-                        <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
-                            <button onclick="app.completeOrder('${order.id}')" class="btn-success">إكمال</button>
-                            <button onclick="app.cancelOrder('${order.id}')" class="btn-danger">إلغاء</button>
-                        </div>
-                    </div>
-                `).join('');
+                const cont = document.getElementById('takenOrdersList');
+                if (!cont) return;
+                if (!this.state.takenOrders.length) { cont.innerHTML = '<p style="text-align:center;">لا توجد طلبات مأخوذة</p>'; return; }
+                cont.innerHTML = this.state.takenOrders.map(o => `<div style="background:#fff3e0; padding:1rem; border-radius:1rem; margin-bottom:1rem; border-right:0.3rem solid #f8961e;"><strong><i class="${this.serviceIcons[o.service]}"></i> ${this.serviceNames[o.service]}</strong><p style="margin:0.5rem 0;">${o.details.substring(0,80)}...</p><p>الزبون: <a href="https://wa.me/${o.phone}" target="_blank">${o.phone}</a></p><div style="display:flex; gap:0.8rem;"><button onclick="app.completeOrder('${o.id}')" class="btn-success">إكمال</button><button onclick="app.cancelOrder('${o.id}')" class="btn-danger">إلغاء</button></div></div>`).join('');
             }
             
-            resetNewOrdersCheck() {
-                this.state.newOrdersCheck = this.state.orders.filter(o => o.status === 'new').map(o => o.id);
-                this.saveToStorage('newOrdersCheck', this.state.newOrdersCheck);
-            }
-            
-            calculateDistance(lat1, lon1, lat2, lon2) {
-                const R = 6371;
-                const dLat = (lat2 - lat1) * Math.PI / 180;
-                const dLon = (lon2 - lon1) * Math.PI / 180;
-                const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
-                return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-            }
-            
-            getStatusText(status) {
-                return { new: 'جديد', taken: 'مأخوذ', completed: 'مكتمل', cancelled: 'ملغى' } [status] || status;
-            }
+            resetNewOrdersCheck() { this.state.newOrdersCheck = this.state.orders.filter(o=>o.status==='new').map(o=>o.id); this.saveToStorage('newOrdersCheck', this.state.newOrdersCheck); }
+            calculateDistance(lat1,lon1,lat2,lon2) { const R=6371; const dLat=(lat2-lat1)*Math.PI/180; const dLon=(lon2-lon1)*Math.PI/180; const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2; return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a)); }
+            getStatusText(s) { return { new:'جديد', taken:'مأخوذ', completed:'مكتمل', cancelled:'ملغى' }[s] || s; }
             
             loadUserData() {
                 this.state.user = this.getFromStorage('user');
@@ -1961,80 +1436,19 @@
                 this.state.orders = this.getFromStorage('orders') || [];
                 this.state.takenOrders = this.getFromStorage('takenOrders') || [];
                 this.state.newOrdersCheck = this.getFromStorage('newOrdersCheck') || [];
-                
-                if (this.state.user) {
-                    document.getElementById('customerName').value = this.state.user.name || '';
-                    document.getElementById('customerPhone').value = this.state.user.phone || '';
-                }
+                if (this.state.user) { document.getElementById('customerName').value = this.state.user.name || ''; document.getElementById('customerPhone').value = this.state.user.phone || ''; }
                 if (this.state.provider) {
                     document.getElementById('providerName').value = this.state.provider.name || '';
-                    document.querySelectorAll('input[name="services"]').forEach(cb => {
-                        cb.checked = this.state.provider.services?.includes(cb.value) || false;
-                    });
+                    document.querySelectorAll('input[name="services"]').forEach(cb => cb.checked = this.state.provider.services?.includes(cb.value) || false);
                 }
             }
-            
-            getFromStorage(key) {
-                try { return JSON.parse(localStorage.getItem(`talabat_${key}`)); } catch { return null; }
-            }
-            
-            saveToStorage(key, data) {
-                localStorage.setItem(`talabat_${key}`, JSON.stringify(data));
-            }
-            
-            updateAppStatus(status) {
-                document.getElementById('appStatus').textContent = 'الحالة: ' + status;
-            }
+            getFromStorage(k) { try { return JSON.parse(localStorage.getItem(`talabat_${k}`)); } catch { return null; } }
+            saveToStorage(k, d) { localStorage.setItem(`talabat_${k}`, JSON.stringify(d)); }
+            updateAppStatus(s) { document.getElementById('appStatus').textContent = 'الحالة: ' + s; }
         }
         
         let app;
-        window.addEventListener('DOMContentLoaded', () => {
-            app = new TalabatApp();
-            window.app = app;
-        });
+        window.addEventListener('DOMContentLoaded', () => { app = new TalabatApp(); window.app = app; });
     </script>
-    <!-- محتوى sw.js سيتم إنشاؤه كملف منفصل، ولكن يمكن وضعه هنا للتكامل -->
-    <script>
-        // هذا السكربت يمثل محتوى ملف sw.js - يجب حفظه كملف منفصل بنفس الاسم
-        // المحتوى الفعلي لـ sw.js:
-        /*
-        const CACHE_NAME = 'talabat-cache-v1';
-        const urlsToCache = [
-            '.',
-            'index.html',
-            'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css',
-            'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
-            'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
-            'https://cdn.jsdelivr.net/npm/sweetalert2@11'
-        ];
-
-        self.addEventListener('install', event => {
-            event.waitUntil(
-                caches.open(CACHE_NAME)
-                    .then(cache => cache.addAll(urlsToCache))
-            );
-        });
-
-        self.addEventListener('fetch', event => {
-            event.respondWith(
-                caches.match(event.request)
-                    .then(response => response || fetch(event.request))
-            );
-        });
-
-        self.addEventListener('activate', event => {
-            event.waitUntil(
-                caches.keys().then(cacheNames => {
-                    return Promise.all(
-                        cacheNames.filter(name => name !== CACHE_NAME)
-                            .map(name => caches.delete(name))
-                    );
-                })
-            );
-        });
-        */
-    </script>
-    
-    <script src="sw.js" type="text/javascript" charset="utf-8"></script>
 </body>
 </html>
