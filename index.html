@@ -1,0 +1,1548 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تطبيق الطلبات - الإصدار النهائي</title>
+    <!-- أيقونة التطبيق -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📦</text></svg>">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📦</text></svg>">
+    <!-- بيان التطبيق (manifest) لتثبيت PWA -->
+    <link rel="manifest" href="data:application/manifest+json,{
+        &quot;name&quot;: &quot;تطبيق الطلبات&quot;,
+        &quot;short_name&quot;: &quot;الطلبات&quot;,
+        &quot;description&quot;: &quot;تطبيق لإدارة الطلبات والخدمات&quot;,
+        &quot;start_url&quot;: &quot;./&quot;,
+        &quot;display&quot;: &quot;standalone&quot;,
+        &quot;background_color&quot;: &quot;#6a11cb&quot;,
+        &quot;theme_color&quot;: &quot;#6a11cb&quot;,
+        &quot;icons&quot;: [{
+            &quot;src&quot;: &quot;data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%236a11cb'/><text x='50' y='70' font-size='60' text-anchor='middle' fill='white' font-family='Arial'>📦</text></svg>&quot;,
+            &quot;sizes&quot;: &quot;192x192&quot;,
+            &quot;type&quot;: &quot;image/svg+xml&quot;
+        }, {
+            &quot;src&quot;: &quot;data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%236a11cb'/><text x='50' y='70' font-size='60' text-anchor='middle' fill='white' font-family='Arial'>📦</text></svg>&quot;,
+            &quot;sizes&quot;: &quot;512x512&quot;,
+            &quot;type&quot;: &quot;image/svg+xml&quot;
+        }]
+    }">
+    <!-- روابط CSS والمكتبات -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        /* الأنماط كما هي مع الحفاظ على التنسيقات السابقة */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%); padding: 0; margin: 0; font-size: 16px; }
+        .header { background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); color: white; padding: 1.8rem; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+        .header h1 { margin-bottom: 0.5rem; font-size: 2.5rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.2); }
+        .header p { opacity: 0.9; font-size: 1.3rem; }
+        .nav { display: flex; justify-content: center; gap: 1rem; padding: 1.5rem; background: white; box-shadow: 0 4px 15px rgba(0,0,0,0.1); flex-wrap: wrap; border-bottom: 3px solid #6a11cb; }
+        .nav-btn { background: #f0f2f5; border: none; padding: 1rem 2.5rem; border-radius: 50px; font-size: 1.2rem; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; gap: 10px; color: #555; font-weight: 600; }
+        .nav-btn.active { background: linear-gradient(135deg, #6a11cb, #2575fc); color: white; box-shadow: 0 4px 10px rgba(106, 17, 203, 0.3); }
+        .nav-btn i { font-size: 1.3rem; }
+        .container { max-width: 1400px; margin: 2rem auto; padding: 0 2rem; }
+        .content-section { display: none; background: white; border-radius: 25px; padding: 2.5rem; box-shadow: 0 10px 30px rgba(0,0,0,0.1); margin-top: 1rem; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .content-section.active { display: block; }
+        .section-title { font-size: 2.2rem; margin-bottom: 2rem; color: #333; display: flex; align-items: center; gap: 15px; border-bottom: 3px solid #f0f2f5; padding-bottom: 1.2rem; }
+        .section-title i { color: #6a11cb; font-size: 2.2rem; }
+        .form-group { margin-bottom: 1.8rem; }
+        .form-group label { display: block; margin-bottom: 0.8rem; color: #444; font-weight: 700; font-size: 1.2rem; }
+        .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 1.2rem; border: 2px solid #e0e0e0; border-radius: 15px; font-size: 1.1rem; transition: all 0.3s; background: #fafafa; }
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus { outline: none; border-color: #6a11cb; box-shadow: 0 0 0 4px rgba(106, 17, 203, 0.1); background: white; }
+        .btn-primary, .btn-secondary, .btn-success, .btn-danger, .btn-admin { border: none; padding: 1.2rem 2.5rem; border-radius: 15px; font-size: 1.2rem; cursor: pointer; transition: all 0.3s; display: inline-flex; align-items: center; gap: 12px; font-weight: 700; }
+        .btn-primary { background: linear-gradient(135deg, #6a11cb, #2575fc); color: white; box-shadow: 0 4px 15px rgba(106, 17, 203, 0.3); }
+        .btn-secondary { background: #f0f2f5; color: #555; }
+        .btn-success { background: linear-gradient(135deg, #11998e, #38ef7d); color: white; }
+        .btn-danger { background: linear-gradient(135deg, #eb3349, #f45c43); color: white; }
+        .btn-admin { background: linear-gradient(135deg, #8e2de2, #4a00e0); color: white; }
+        .btn-primary:hover, .btn-secondary:hover, .btn-success:hover, .btn-danger:hover, .btn-admin:hover { transform: translateY(-4px); box-shadow: 0 8px 25px rgba(0,0,0,0.2); }
+        #map { height: 550px; width: 100%; border-radius: 25px; margin-bottom: 1.8rem; border: 3px solid white; box-shadow: 0 5px 20px rgba(0,0,0,0.2); z-index: 1; }
+        .location-status { background: #f8f9fa; padding: 1.2rem 2rem; border-radius: 20px; margin: 2rem 0; display: flex; align-items: center; gap: 20px; color: #555; border: 1px solid #e0e0e0; font-size: 1.2rem; }
+        .location-status i { color: #2575fc; font-size: 1.6rem; }
+        .filter-bar { display: flex; gap: 1.5rem; align-items: center; margin-bottom: 2.5rem; flex-wrap: wrap; background: #f8f9fa; padding: 1.5rem; border-radius: 20px; }
+        .filter-bar select { flex: 2; min-width: 300px; padding: 1.2rem; border: 2px solid #e0e0e0; border-radius: 15px; font-size: 1.2rem; background: white; }
+        .orders-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 2rem; margin-top: 2rem; }
+        .order-item { background: white; border-radius: 22px; padding: 1.8rem; border-right: 8px solid #6a11cb; transition: all 0.3s; box-shadow: 0 5px 15px rgba(0,0,0,0.05); border: 1px solid #f0f0f0; }
+        .order-item:hover { transform: translateY(-6px); box-shadow: 0 20px 30px rgba(106, 17, 203, 0.1); }
+        .order-item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem; }
+        .order-item-service { font-weight: 800; color: #333; font-size: 1.3rem; }
+        .order-item-status { font-size: 1rem; padding: 0.5rem 1.2rem; border-radius: 40px; font-weight: 700; }
+        .status-new { background: #dbeafe; color: #1d4ed8; }
+        .status-taken { background: #fef3c7; color: #d97706; }
+        .status-completed { background: #d1fae5; color: #065f46; }
+        .status-cancelled { background: #fee2e2; color: #b91c1c; }
+        .order-item-details { color: #555; font-size: 1.1rem; margin: 1rem 0; line-height: 1.6; }
+        .order-item-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 1.2rem; font-size: 1.1rem; color: #666; }
+        .order-item-actions { display: flex; gap: 1rem; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(5px); }
+        .modal.active { display: flex; }
+        .modal-content { background: white; border-radius: 30px; max-width: 700px; width: 95%; max-height: 90vh; overflow-y: auto; padding: 2.5rem; position: relative; box-shadow: 0 30px 60px rgba(0,0,0,0.3); }
+        .modal-close { position: absolute; top: 1.5rem; left: 1.5rem; background: none; border: none; font-size: 2.5rem; cursor: pointer; color: #666; transition: color 0.2s; }
+        .modal-close:hover { color: #f00; }
+        .service-checkbox-group { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem; background: #f8f9fa; padding: 1.5rem; border-radius: 20px; }
+        .service-checkbox { display: flex; align-items: center; gap: 0.8rem; padding: 0.8rem; background: white; border-radius: 12px; border: 1px solid #e0e0e0; font-size: 1.1rem; }
+        .channels-table { width: 100%; border-collapse: collapse; margin: 2rem 0; border-radius: 20px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .channels-table th, .channels-table td { border: 1px solid #e0e0e0; padding: 1.2rem; text-align: right; font-size: 1.1rem; }
+        .channels-table th { background: linear-gradient(135deg, #f0f2f5, #e9ecef); font-weight: 800; }
+        .channel-link { background: #25D366; color: white; padding: 0.7rem 1.5rem; border-radius: 40px; text-decoration: none; display: inline-flex; align-items: center; gap: 10px; font-size: 1.1rem; transition: background 0.2s; }
+        .channel-link:hover { background: #128C7E; }
+        .admin-panel { background: linear-gradient(135deg, #f3e5f5, #ede7f6); padding: 2rem; border-radius: 22px; margin-bottom: 2.5rem; border: 1px solid #d1c4e9; }
+        .footer { text-align: center; padding: 2rem; color: #666; font-size: 1.1rem; background: white; margin-top: 2.5rem; border-top: 1px solid #e0e0e0; }
+        #loadingOverlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 10000; justify-content: center; align-items: center; backdrop-filter: blur(4px); }
+        .loading-box { background: white; padding: 2.5rem; border-radius: 40px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.3); animation: pulse 1.5s infinite; }
+        .loading-box i { font-size: 4rem; color: #6a11cb; margin-bottom: 1.2rem; }
+        .loading-box p { font-size: 1.5rem; color: #333; font-weight: 700; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+        #installPwaBtn { background: #00a152; color: white; border: none; padding: 0.8rem 2rem; border-radius: 50px; font-size: 1.2rem; cursor: pointer; display: none; align-items: center; gap: 10px; margin-right: auto; font-weight: 600; box-shadow: 0 4px 15px rgba(0, 161, 82, 0.4); }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1><i class="fas fa-tasks"></i> تطبيق الطلبات</h1>
+        <p>منصة لربط الزبائن بمقدمي الخدمات</p>
+    </div>
+    
+    <div class="nav">
+        <button class="nav-btn active" id="homeBtn"><i class="fas fa-home"></i> الرئيسية</button>
+        <button class="nav-btn" id="customerBtn"><i class="fas fa-user"></i> الزبون</button>
+        <button class="nav-btn" id="providerBtn"><i class="fas fa-truck"></i> مقدم الخدمة</button>
+        <button class="nav-btn btn-admin" id="adminBtn"><i class="fas fa-crown"></i> الأدمن</button>
+        <button id="installPwaBtn"><i class="fas fa-download"></i> تثبيت التطبيق</button>
+    </div>
+    
+    <div class="container">
+        <!-- قسم الرئيسية -->
+        <div id="homeSection" class="content-section active">
+            <h2 class="section-title"><i class="fas fa-map-marked-alt"></i> الخريطة والطلبات القريبة</h2>
+            <div id="map"></div>
+            
+            <div class="location-status" id="locationStatus">
+                <i class="fas fa-map-pin"></i>
+                <span>جاري تحديد الموقع...</span>
+                <button id="locateMeBtn" class="btn-secondary" style="margin-right: auto; padding: 0.8rem 2rem;">
+                    <i class="fas fa-crosshairs"></i> تحديث موقعي
+                </button>
+            </div>
+            
+            <div class="filter-bar">
+                <select id="serviceFilter">
+                    <option value="all">جميع الخدمات</option>
+                    <option value="taxi">تكسي</option>
+                    <option value="delivery">توصيل طلبات</option>
+                    <option value="food">توصيل وجبات</option>
+                    <option value="vegetables">توصيل خضروات</option>
+                    <option value="rental">إيجارات نقل</option>
+                    <option value="goods">نقل بضائع</option>
+                    <option value="repair">تصليح / صيانة</option>
+                    <option value="electrician">كهربائي</option>
+                    <option value="appliance">إصلاح أدوات كهربائية</option>
+                    <option value="store">محل أدوات كهربائية</option>
+                    <option value="restaurant">مطاعم</option>
+                </select>
+                <button class="btn-primary" id="newOrderBtn"><i class="fas fa-plus"></i> طلب جديد</button>
+            </div>
+            
+            <!-- تغيير النص من 1 كم إلى 2 كم -->
+            <h3 style="margin: 2.5rem 0 1.2rem; font-size: 1.8rem;"><i class="fas fa-location-arrow"></i> الطلبات القريبة (ضمن 2 كم)</h3>
+            <div id="nearbyOrders" class="orders-grid"></div>
+            
+            <h3 style="margin: 2.5rem 0 1.2rem; font-size: 1.8rem;"><i class="fas fa-lightbulb"></i> اقتراحات لخدمات أخرى قريبة</h3>
+            <div id="suggestedOrders" class="orders-grid"></div>
+        </div>
+        
+        <!-- قسم الزبون -->
+        <div id="customerSection" class="content-section">
+            <h2 class="section-title"><i class="fas fa-user-circle"></i> بيانات الزبون</h2>
+            <form id="customerForm">
+                <div class="form-group">
+                    <label>الاسم <span style="color: red;">*</span></label>
+                    <input type="text" id="customerName" required>
+                </div>
+                <div class="form-group">
+                    <label>رقم الواتساب <span style="color: red;">*</span></label>
+                    <input type="tel" id="customerPhone" required placeholder="+963*********" 
+                           pattern="\+963[0-9]{9,}" title="يجب أن يبدأ الرقم بـ +963 ويتكون من 13 رقم (مثال: +963912345678)">
+                </div>
+                <button type="submit" class="btn-primary"><i class="fas fa-save"></i> حفظ</button>
+            </form>
+            
+            <h3 style="margin: 2.5rem 0 1.5rem; font-size: 1.8rem;">طلباتي السابقة</h3>
+            <div id="myOrdersList" class="orders-grid"></div>
+        </div>
+        
+        <!-- قسم مقدم الخدمة -->
+        <div id="providerSection" class="content-section">
+            <h2 class="section-title"><i class="fas fa-id-card"></i> إعدادات مقدم الخدمة</h2>
+            <form id="providerForm">
+                <div class="form-group">
+                    <label>الاسم <span style="color: red;">*</span></label>
+                    <input type="text" id="providerName" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>الخدمات التي تقدمها <span style="color: red;">*</span></label>
+                    <div class="service-checkbox-group">
+                        <label class="service-checkbox"><input type="checkbox" name="services" value="taxi"> تكسي</label>
+                        <label class="service-checkbox"><input type="checkbox" name="services" value="delivery"> توصيل طلبات</label>
+                        <label class="service-checkbox"><input type="checkbox" name="services" value="food"> توصيل وجبات</label>
+                        <label class="service-checkbox"><input type="checkbox" name="services" value="vegetables"> توصيل خضروات</label>
+                        <label class="service-checkbox"><input type="checkbox" name="services" value="rental"> إيجارات نقل</label>
+                        <label class="service-checkbox"><input type="checkbox" name="services" value="goods"> نقل بضائع</label>
+                        <label class="service-checkbox"><input type="checkbox" name="services" value="repair"> تصليح / صيانة</label>
+                        <label class="service-checkbox"><input type="checkbox" name="services" value="electrician"> كهربائي</label>
+                        <label class="service-checkbox"><input type="checkbox" name="services" value="appliance"> إصلاح أدوات كهربائية</label>
+                        <label class="service-checkbox"><input type="checkbox" name="services" value="store"> محل أدوات كهربائية</label>
+                        <label class="service-checkbox"><input type="checkbox" name="services" value="restaurant"> مطاعم</label>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn-primary"><i class="fas fa-save"></i> حفظ الإعدادات</button>
+            </form>
+            
+            <!-- عرض روابط القنوات حسب الخدمات المختارة (لمقدم الخدمة) -->
+            <div id="providerChannelsContainer" style="margin-top: 2.5rem; display: none;">
+                <h3 style="font-size: 1.8rem;"><i class="fas fa-link"></i> روابط القنوات للخدمات التي تقدمها</h3>
+                <p style="font-size: 1.2rem;">انضم إلى القنوات المناسبة لمتابعة الطلبات:</p>
+                <table class="channels-table" id="providerChannelsTable">
+                    <thead>
+                        <tr>
+                            <th>الخدمة</th>
+                            <th>رابط القناة</th>
+                            <th>انضمام</th>
+                        </tr>
+                    </thead>
+                    <tbody id="providerChannelsBody"></tbody>
+                </table>
+            </div>
+            
+            <h3 style="margin: 2.5rem 0 1.5rem; font-size: 1.8rem;">الطلبات المأخوذة</h3>
+            <div id="takenOrdersList"></div>
+        </div>
+        
+        <!-- قسم الأدمن -->
+        <div id="adminSection" class="content-section">
+            <h2 class="section-title"><i class="fas fa-crown"></i> لوحة تحكم الأدمن</h2>
+            
+            <!-- طلب كلمة السر -->
+            <div id="adminLogin" class="admin-panel">
+                <div class="form-group">
+                    <label>كلمة السر</label>
+                    <input type="password" id="adminPassword" placeholder="أدخل كلمة السر">
+                </div>
+                <button id="adminLoginBtn" class="btn-admin"><i class="fas fa-lock-open"></i> دخول</button>
+            </div>
+            
+            <!-- محتوى الأدمن (يظهر بعد تسجيل الدخول) -->
+            <div id="adminContent" style="display: none;">
+                <h3 style="font-size: 1.8rem;">إعدادات البوت والقنوات</h3>
+                
+                <div class="form-group">
+                    <label>توكن البوت العام (يستخدم لجميع القنوات)</label>
+                    <input type="text" id="adminBotToken" placeholder="123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11">
+                </div>
+                
+                <p style="font-size: 1.2rem;">أدخل معرف القناة لكل خدمة (مثل @username أو -100...). يجب أن يكون البوت مضافاً إلى القناة كمشرف.</p>
+                
+                <table class="channels-table" id="adminChannelsTable">
+                    <thead>
+                        <tr>
+                            <th>الخدمة</th>
+                            <th>معرف القناة (لإرسال الإشعارات)</th>
+                            <th>رابط الانضمام (لمقدم الخدمة)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminChannelsBody"></tbody>
+                </table>
+                
+                <button id="saveChannelsBtn" class="btn-success"><i class="fas fa-save"></i> حفظ الإعدادات</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- مودال إنشاء طلب جديد -->
+    <div id="newOrderModal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close">&times;</button>
+            <h2 style="font-size: 2rem;"><i class="fas fa-plus-circle"></i> إنشاء طلب جديد</h2>
+            <form id="newOrderForm">
+                <div class="form-group">
+                    <label>الخدمة</label>
+                    <select id="orderService" required>
+                        <option value="">اختر الخدمة</option>
+                        <option value="taxi">تكسي</option>
+                        <option value="delivery">توصيل طلبات</option>
+                        <option value="food">توصيل وجبات</option>
+                        <option value="vegetables">توصيل خضروات</option>
+                        <option value="rental">إيجارات نقل</option>
+                        <option value="goods">نقل بضائع</option>
+                        <option value="repair">تصليح / صيانة</option>
+                        <option value="electrician">كهربائي</option>
+                        <option value="appliance">إصلاح أدوات كهربائية</option>
+                        <option value="store">محل أدوات كهربائية</option>
+                        <option value="restaurant">مطاعم</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>تفاصيل الطلب</label>
+                    <textarea id="orderDetails" rows="4" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>الموقع</label>
+                    <div id="orderLocationInfo">
+                        <p>جاري تحديد موقعك...</p>
+                        <button type="button" id="pickLocationBtn" class="btn-secondary">
+                            <i class="fas fa-map-pin"></i> تحديد الموقع يدوياً
+                        </button>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 1.5rem; justify-content: flex-end;">
+                    <button type="submit" class="btn-primary">إرسال الطلب</button>
+                    <button type="button" class="btn-secondary" onclick="app.closeModals()">إلغاء</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- مودال اختيار الموقع -->
+    <div id="locationPickerModal" class="modal">
+        <div class="modal-content" style="max-width: 1000px;">
+            <button class="modal-close">&times;</button>
+            <h2 style="font-size: 2rem;"><i class="fas fa-map-marker-alt"></i> اختر الموقع</h2>
+            <div id="locationMap" style="height: 550px; margin: 1.5rem 0; border-radius: 22px; border: 2px solid #ddd;"></div>
+            <div style="display: flex; gap: 1.5rem; justify-content: center; flex-wrap: wrap;">
+                <button id="useCurrentLocationBtn" class="btn-secondary">
+                    <i class="fas fa-location-arrow"></i> استخدام موقعي الحالي
+                </button>
+                <button id="confirmLocationBtn" class="btn-primary">
+                    <i class="fas fa-check"></i> تأكيد الموقع
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- مودال عرض تفاصيل الطلب -->
+    <div id="orderDetailsModal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close">&times;</button>
+            <h2 style="font-size: 2rem;"><i class="fas fa-info-circle"></i> تفاصيل الطلب</h2>
+            <div id="orderDetailsContent" style="font-size: 1.2rem;"></div>
+        </div>
+    </div>
+    
+    <!-- مؤشر التحميل -->
+    <div id="loadingOverlay">
+        <div class="loading-box">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p id="loadingMessage">جاري التحميل...</p>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <h3> فريق الدعم :00963949340870</h3>
+        <h3 style="color:red;">شكاوي:00963949340870</h3>
+        <p>تصميم: جلال المصطفى </p>
+        <p id="appStatus" style="font-size: 1.1rem; color: #888;">الحالة: جاهز</p>
+        <p>  جميع الحقوق محفوظة &copy; 2025</p>
+    </div>
+    
+    <script>
+        // ================== سكريبت تثبيت التطبيق (PWA) مع Service Worker مضمن ==================
+        (function() {
+            // إنشاء Service Worker ديناميكيًا باستخدام Blob
+            const swScript = `
+                // Service Worker بسيط للتخزين المؤقت
+                const CACHE_NAME = 'talabat-cache-v1';
+                const urlsToCache = [
+                    './',
+                    'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css',
+                    'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
+                    'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
+                    'https://cdn.jsdelivr.net/npm/sweetalert2@11'
+                ];
+
+                self.addEventListener('install', event => {
+                    event.waitUntil(
+                        caches.open(CACHE_NAME)
+                            .then(cache => cache.addAll(urlsToCache))
+                    );
+                });
+
+                self.addEventListener('fetch', event => {
+                    event.respondWith(
+                        caches.match(event.request)
+                            .then(response => response || fetch(event.request))
+                    );
+                });
+            `;
+
+            const blob = new Blob([swScript], { type: 'application/javascript' });
+            const swUrl = URL.createObjectURL(blob);
+
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register(swUrl, { scope: './' })
+                    .then(reg => console.log('Service Worker registered successfully'))
+                    .catch(err => console.warn('Service Worker registration failed (non-critical):', err));
+            }
+
+            // منطق زر التثبيت
+            let deferredPrompt;
+            const installBtn = document.getElementById('installPwaBtn');
+
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                installBtn.style.display = 'flex';
+            });
+
+            installBtn.addEventListener('click', async () => {
+                if (!deferredPrompt) return;
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    installBtn.style.display = 'none';
+                }
+                deferredPrompt = null;
+            });
+
+            window.addEventListener('appinstalled', () => {
+                installBtn.style.display = 'none';
+                console.log('تم تثبيت التطبيق');
+            });
+        })();
+
+        // ================== التهيئة ==================
+        // قم بتغيير هذا الرابط إلى رابط تطبيق الويب الخاص بك بعد النشر
+        const API_BASE_URL = 'https://script.google.com/macros/s/AKfycbwgPe-dUI3wh599QmvcQZGcXllE9z6g1qMnTZ6QirjUZ6Wkxk9TdounFFqiwRZjZPY3dw/exec'; // استبدل هذا الرابط
+        
+        // كلمة سر الأدمن
+        const ADMIN_PASSWORD = '009911';
+        
+        // تطبيق الطلبات
+        class TalabatApp {
+            constructor() {
+                this.config = {
+                    API_BASE_URL: API_BASE_URL,
+                    MAP_CENTER: [35.9312, 36.6336], // إدلب، سوريا
+                    MAP_ZOOM: 12,
+                    UPDATE_INTERVAL: 30000, // 30 ثانية
+                    ORDER_TIMEOUT: 15 * 60 * 1000, // 15 دقيقة
+                    TAKEN_TIMEOUT: 60 * 1000, // دقيقة واحدة
+                    // تغيير المسافة من 1 كم إلى 2 كم
+                    NEARBY_DISTANCE: 2, // 2 كيلومتر
+                };
+                
+                this.state = {
+                    user: null,
+                    provider: null,
+                    orders: [],
+                    channels: {}, // { service: { username, inviteLink } }
+                    botToken: '', // التوكن العام
+                    map: null,
+                    locationPickerMap: null,
+                    markers: {},
+                    locationMarker: null,
+                    currentPosition: null,
+                    selectedLocation: null,
+                    selectedOrderLocation: null,
+                    updateTimer: null,
+                    lastFilter: 'all',
+                    takenOrders: [],
+                    newOrdersCheck: [],
+                    isFirstLoad: true,
+                    adminLoggedIn: false
+                };
+                
+                this.serviceIcons = {
+                    taxi: 'fas fa-taxi',
+                    delivery: 'fas fa-truck',
+                    food: 'fas fa-utensils',
+                    vegetables: 'fas fa-carrot',
+                    rental: 'fas fa-truck-moving',
+                    goods: 'fas fa-boxes',
+                    repair: 'fas fa-wrench',
+                    electrician: 'fas fa-bolt',
+                    appliance: 'fas fa-tv',
+                    store: 'fas fa-store',
+                    restaurant: 'fas fa-hotel',
+                };
+                
+                this.serviceNames = {
+                    taxi: 'تكسي',
+                    delivery: 'توصيل طلبات',
+                    food: 'توصيل وجبات',
+                    vegetables: 'توصيل خضروات',
+                    rental: 'إيجارات نقل',
+                    goods: 'نقل بضائع',
+                    repair: 'تصليح / صيانة',
+                    electrician: 'كهربائي',
+                    appliance: 'إصلاح أدوات كهربائية',
+                    store: 'محل أدوات كهربائية',
+                    restaurant: 'مطاعم',
+                };
+                
+                this.init();
+            }
+            
+            // =============== دوال مساعدة ===============
+            showLoading(message = 'جاري التحميل...') {
+                document.getElementById('loadingMessage').innerText = message;
+                document.getElementById('loadingOverlay').style.display = 'flex';
+            }
+            
+            hideLoading() {
+                document.getElementById('loadingOverlay').style.display = 'none';
+            }
+            
+            async init() {
+                this.loadUserData();
+                this.setupEventListeners();
+                this.initMap();
+                await this.loadChannelsAndBotToken(); // تحميل القنوات والتوكن
+                await this.loadOrdersFromSheet();
+                this.state.isFirstLoad = false;
+                this.startAutoUpdate();
+                this.updateLocationStatus();
+                this.updateAppStatus('جاهز للتشغيل');
+                this.loadFilterPreference();
+                this.showUnakenOrdersOnMap();
+            }
+            
+            setupEventListeners() {
+                document.getElementById('homeBtn').addEventListener('click', () => this.showSection('home'));
+                document.getElementById('customerBtn').addEventListener('click', () => this.showSection('customer'));
+                document.getElementById('providerBtn').addEventListener('click', () => this.showSection('provider'));
+                document.getElementById('adminBtn').addEventListener('click', () => this.showSection('admin'));
+                
+                document.getElementById('customerForm').addEventListener('submit', (e) => this.saveCustomer(e));
+                document.getElementById('providerForm').addEventListener('submit', (e) => this.saveProvider(e));
+                document.getElementById('newOrderForm').addEventListener('submit', (e) => this.createOrder(e));
+                document.getElementById('newOrderBtn').addEventListener('click', () => this.showNewOrderModal());
+                document.getElementById('locateMeBtn').addEventListener('click', () => this.locateUser());
+                document.getElementById('pickLocationBtn').addEventListener('click', () => this.showLocationPicker());
+                document.getElementById('confirmLocationBtn').addEventListener('click', () => this.confirmLocation());
+                document.getElementById('useCurrentLocationBtn').addEventListener('click', () => this.useCurrentLocationForPicker());
+                document.getElementById('serviceFilter').addEventListener('change', (e) => {
+                    this.filterOrders(e.target.value);
+                    this.saveFilterPreference();
+                });
+                
+                // مستمع لتغيير خدمات مقدم الخدمة لعرض روابط القنوات
+                document.querySelectorAll('input[name="services"]').forEach(cb => {
+                    cb.addEventListener('change', () => this.displayProviderChannels());
+                });
+                
+                // أزرار الأدمن
+                document.getElementById('adminLoginBtn').addEventListener('click', () => this.adminLogin());
+                document.getElementById('saveChannelsBtn').addEventListener('click', () => this.saveChannels());
+                
+                document.querySelectorAll('.modal-close').forEach(btn => {
+                    btn.addEventListener('click', () => this.closeModals());
+                });
+                window.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('modal')) {
+                        this.closeModals();
+                    }
+                });
+            }
+            
+            // عرض روابط القنوات لمقدم الخدمة حسب الخدمات المختارة
+            displayProviderChannels() {
+                const selectedServices = [];
+                document.querySelectorAll('input[name="services"]:checked').forEach(cb => {
+                    selectedServices.push(cb.value);
+                });
+                
+                const container = document.getElementById('providerChannelsContainer');
+                const tbody = document.getElementById('providerChannelsBody');
+                
+                if (selectedServices.length === 0 || Object.keys(this.state.channels).length === 0) {
+                    container.style.display = 'none';
+                    return;
+                }
+                
+                let html = '';
+                selectedServices.forEach(service => {
+                    const channel = this.state.channels[service];
+                    if (channel && channel.inviteLink) {
+                        html += `
+                            <tr>
+                                <td><i class="${this.serviceIcons[service]}"></i> ${this.serviceNames[service]}</td>
+                                <td><a href="${channel.inviteLink}" target="_blank" class="channel-link"><i class="fab fa-telegram"></i> رابط القناة</a></td>
+                                <td><a href="${channel.inviteLink}" target="_blank" class="btn-success" style="padding: 0.7rem 1.5rem; font-size: 1.1rem; text-decoration: none;">انضمام</a></td>
+                            </tr>
+                        `;
+                    }
+                });
+                
+                if (html) {
+                    tbody.innerHTML = html;
+                    container.style.display = 'block';
+                } else {
+                    container.style.display = 'none';
+                }
+            }
+            
+            // عرض جدول القنوات في لوحة الأدمن
+            displayAdminChannels() {
+                const tbody = document.getElementById('adminChannelsBody');
+                let html = '';
+                Object.keys(this.serviceNames).forEach(service => {
+                    const channel = this.state.channels[service] || { username: '', inviteLink: '' };
+                    html += `
+                        <tr>
+                            <td><i class="${this.serviceIcons[service]}"></i> ${this.serviceNames[service]}</td>
+                            <td><input type="text" id="username_${service}" class="form-control" value="${channel.username || ''}" placeholder="@username" style="width: 100%; padding: 0.9rem; border-radius: 12px; border: 1px solid #ddd; font-size: 1.1rem;"></td>
+                            <td><input type="text" id="link_${service}" class="form-control" value="${channel.inviteLink || ''}" placeholder="https://t.me/joinchat/..." style="width: 100%; padding: 0.9rem; border-radius: 12px; border: 1px solid #ddd; font-size: 1.1rem;"></td>
+                        </tr>
+                    `;
+                });
+                tbody.innerHTML = html;
+                document.getElementById('adminBotToken').value = this.state.botToken || '';
+            }
+            
+            // تسجيل دخول الأدمن
+            adminLogin() {
+                const pwd = document.getElementById('adminPassword').value;
+                if (pwd === ADMIN_PASSWORD) {
+                    this.state.adminLoggedIn = true;
+                    document.getElementById('adminLogin').style.display = 'none';
+                    document.getElementById('adminContent').style.display = 'block';
+                    // تحميل أحدث البيانات وعرضها
+                    this.loadChannelsAndBotToken().then(() => {
+                        this.displayAdminChannels();
+                    });
+                    this.showAlert('تم تسجيل الدخول بنجاح', 'success');
+                } else {
+                    this.showAlert('كلمة السر خاطئة', 'error');
+                }
+            }
+            
+            // حفظ القنوات والتوكن من لوحة الأدمن
+            async saveChannels() {
+                const channels = {};
+                Object.keys(this.serviceNames).forEach(service => {
+                    const username = document.getElementById(`username_${service}`).value.trim();
+                    const inviteLink = document.getElementById(`link_${service}`).value.trim();
+                    channels[service] = { username, inviteLink };
+                });
+                
+                const botToken = document.getElementById('adminBotToken').value.trim();
+                
+                this.showLoading('جاري حفظ الإعدادات...');
+                try {
+                    await this.callAppsScript('saveChannels', {
+                        channels: JSON.stringify(channels),
+                        botToken: botToken
+                    });
+                    this.state.channels = channels;
+                    this.state.botToken = botToken;
+                    this.hideLoading();
+                    this.showAlert('تم حفظ الإعدادات بنجاح', 'success');
+                    this.displayProviderChannels(); // تحديث عرض القنوات لمقدم الخدمة
+                } catch (error) {
+                    this.hideLoading();
+                    this.showAlert('فشل حفظ الإعدادات: ' + error.message, 'error');
+                }
+            }
+            
+            // ================== دوال Google Sheets ==================
+            async callAppsScript(action, data = {}) {
+                const url = this.config.API_BASE_URL;
+                const formData = new URLSearchParams();
+                formData.append('action', action);
+                for (let key in data) {
+                    if (data.hasOwnProperty(key)) {
+                        formData.append(key, data[key]);
+                    }
+                }
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: formData
+                    });
+                    if (!response.ok) throw new Error('فشل الاتصال بالخادم');
+                    const result = await response.json();
+                    if (result.error) throw new Error(result.error);
+                    return result;
+                } catch (error) {
+                    console.error('API call error:', error);
+                    throw error;
+                }
+            }
+            
+            async loadChannelsAndBotToken() {
+                try {
+                    const result = await this.callAppsScript('getChannels');
+                    this.state.channels = result.channels || {};
+                    this.state.botToken = result.botToken || '';
+                } catch (error) {
+                    console.error('فشل تحميل القنوات:', error);
+                    this.state.channels = {};
+                    this.state.botToken = '';
+                }
+            }
+            
+            async loadOrdersFromSheet() {
+                try {
+                    const result = await this.callAppsScript('getOrders');
+                    this.state.orders = result.orders || [];
+                    this.state.orders = this.state.orders.map(o => {
+                        o.hidden = o.hidden === true || o.hidden === 'true';
+                        return o;
+                    });
+                    this.cleanOldOrders();
+                    this.state.takenOrders = this.state.orders.filter(o => o.status === 'taken' && o.takenBy === this.state.provider?.id);
+                    this.saveToStorage('orders', this.state.orders);
+                    this.saveToStorage('takenOrders', this.state.takenOrders);
+                    this.updateDisplay();
+                } catch (error) {
+                    console.error('فشل تحميل الطلبات:', error);
+                    this.state.orders = this.getFromStorage('orders') || [];
+                    this.state.takenOrders = this.getFromStorage('takenOrders') || [];
+                } finally {
+                    this.hideLoading();
+                }
+            }
+            
+            async saveOrdersToSheet() {
+                try {
+                    await this.callAppsScript('saveOrders', { orders: JSON.stringify(this.state.orders) });
+                } catch (error) {
+                    console.error('فشل حفظ الطلبات:', error);
+                }
+                this.saveToStorage('orders', this.state.orders);
+                this.saveToStorage('takenOrders', this.state.takenOrders);
+            }
+            
+            // ================== دوال الإشعارات ==================
+            async sendBotNotifications(order) {
+                if (this.state.isFirstLoad) return;
+                if (!this.state.botToken) {
+                    console.log('لا يوجد توكن بوت عام مضبوط');
+                    return;
+                }
+                
+                const channel = this.state.channels[order.service];
+                if (!channel || !channel.username) {
+                    console.log('لا يوجد معرف قناة لهذه الخدمة:', order.service);
+                    return;
+                }
+                
+                const success = await this.sendTelegramMessage(this.state.botToken, channel.username, order);
+                if (!success) {
+                    this.showAlert(`فشل إرسال الإشعار للقناة (${this.serviceNames[order.service]}) - تحقق من التوكن ومعرف القناة`, 'warning');
+                }
+            }
+            
+            async sendTelegramMessage(token, chatId, order) {
+                try {
+                    if (!chatId || chatId.trim() === '') {
+                        console.error('معرف القناة فارغ');
+                        return false;
+                    }
+                    
+                    const distance = this.calculateDistance(
+                        this.config.MAP_CENTER[0], this.config.MAP_CENTER[1],
+                        order.location.lat, order.location.lng
+                    ).toFixed(1);
+                    
+                    let message = `
+♻ *طلب خدمة جديد*
+━━━━━━━━━━━━━━
+🔧 *الخدمة:* ${this.serviceNames[order.service]}
+📝*التفاصيل:* ${order.details}
+---------------------------------------------------
+📍 *الموقع:* ${order.location.address}
+📏 *المسافة من مركز إدلب:* ${distance} كم
+📞 *رقم الواتساب:* ${order.phone}
+👤 *الزبون:* ${order.customerName || 'غير محدد'}
+🗺️ *الخريطة:* https://maps.google.com/?q=${order.location.lat},${order.location.lng}
+📱 *رابط الواتساب:* https://wa.me/${order.phone}
+━━━━━━━━━━━━━━
+
+                    `;
+                    
+                    const url = `https://api.telegram.org/bot${token}/sendMessage`;
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            chat_id: chatId,
+                            text: message,
+                            parse_mode: 'Markdown',
+                            reply_markup: {
+                                inline_keyboard: [
+                                    [
+                                        { text: '📞 واتساب', url: `https://wa.me/${order.phone}?text=مرحباً%20${order.customerName}` },
+                                        { text: '🗺️ الخريطة', url: `https://maps.google.com/?q=${order.location.lat},${order.location.lng}` }
+                                    ]
+                                ]
+                            }
+                        })
+                    });
+                    
+                    const result = await response.json();
+                    if (!result.ok) {
+                        console.error('خطأ تليجرام:', result);
+                        if (result.error_code === 400 && result.description.includes('chat not found')) {
+                            this.showAlert(`معرف القناة غير صحيح أو البوت ليس عضواً (${chatId})`, 'error');
+                        } else if (result.error_code === 401) {
+                            this.showAlert('توكن البوت غير صحيح', 'error');
+                        }
+                        return false;
+                    }
+                    return true;
+                } catch (error) {
+                    console.error('فشل إرسال إشعار تليجرام:', error);
+                    return false;
+                }
+            }
+            
+            // ================== دوال الموقع والخريطة ==================
+            initMap() {
+                this.state.map = L.map('map').setView(this.config.MAP_CENTER, this.config.MAP_ZOOM);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap'
+                }).addTo(this.state.map);
+                this.getUserLocation();
+            }
+            
+            initLocationPickerMap() {
+                if (!this.state.locationPickerMap) {
+                    this.state.locationPickerMap = L.map('locationMap').setView(this.config.MAP_CENTER, 13);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(this.state.locationPickerMap);
+                    this.state.locationMarker = L.marker(this.config.MAP_CENTER, { draggable: true }).addTo(this.state.locationPickerMap);
+                    this.state.locationMarker.on('dragend', (e) => {
+                        const position = e.target.getLatLng();
+                        this.state.selectedOrderLocation = {
+                            lat: position.lat,
+                            lng: position.lng,
+                            address: `موقع محدد: ${position.lat.toFixed(6)}, ${position.lng.toFixed(6)}`
+                        };
+                    });
+                    this.state.locationPickerMap.on('click', (e) => {
+                        this.state.locationMarker.setLatLng(e.latlng);
+                        this.state.selectedOrderLocation = {
+                            lat: e.latlng.lat,
+                            lng: e.latlng.lng,
+                            address: `موقع محدد: ${e.latlng.lat.toFixed(6)}, ${e.latlng.lng.toFixed(6)}`
+                        };
+                    });
+                }
+                const initialLocation = this.state.currentPosition || { lat: this.config.MAP_CENTER[0], lng: this.config.MAP_CENTER[1] };
+                this.state.locationPickerMap.setView([initialLocation.lat, initialLocation.lng], 13);
+                this.state.locationMarker.setLatLng([initialLocation.lat, initialLocation.lng]);
+                this.state.selectedOrderLocation = { ...initialLocation, address: `موقع محدد: ${initialLocation.lat.toFixed(6)}, ${initialLocation.lng.toFixed(6)}` };
+            }
+            
+            getUserLocation() {
+                return new Promise((resolve) => {
+                    if (!navigator.geolocation) {
+                        this.updateLocationStatus('الموقع غير مدعوم');
+                        resolve(false);
+                        return;
+                    }
+                    navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                            this.state.currentPosition = {
+                                lat: position.coords.latitude,
+                                lng: position.coords.longitude,
+                                address: 'موقعك الحالي'
+                            };
+                            this.updateLocationStatus('الموقع: جاهز');
+                            resolve(true);
+                        },
+                        (error) => {
+                            let message = 'تعذر تحديد الموقع';
+                            if (error.code === error.PERMISSION_DENIED) message = 'تم رفض الإذن';
+                            else if (error.code === error.POSITION_UNAVAILABLE) message = 'الموقع غير متاح';
+                            else if (error.code === error.TIMEOUT) message = 'انتهت المهلة';
+                            this.updateLocationStatus(message);
+                            resolve(false);
+                        }, { enableHighAccuracy: true, timeout: 10000 }
+                    );
+                });
+            }
+            
+            updateLocationStatus(status) {
+                const element = document.getElementById('locationStatus');
+                if (element) {
+                    const span = element.querySelector('span');
+                    if (span) span.textContent = status;
+                }
+            }
+            
+            locateUser() {
+                this.getUserLocation().then(success => {
+                    if (success && this.state.map) {
+                        this.state.map.setView([this.state.currentPosition.lat, this.state.currentPosition.lng], 13);
+                        this.showAlert('تم تحديد موقعك', 'success');
+                        this.updateDisplay();
+                    } else {
+                        this.showAlert('تعذر تحديد موقعك، حاول يدوياً', 'warning');
+                        this.showLocationPicker();
+                    }
+                });
+            }
+            
+            showLocationPicker() {
+                this.initLocationPickerMap();
+                this.showModal('locationPickerModal');
+            }
+            
+            // دالة confirmLocation المعدلة: لا تغلق نافذة الطلب، تغلق نافذة الخريطة فقط
+            confirmLocation() {
+                if (!this.state.selectedOrderLocation) {
+                    this.showAlert('يرجى تحديد موقع', 'error');
+                    return;
+                }
+                // إغلاق نافذة الخريطة فقط
+                document.getElementById('locationPickerModal').classList.remove('active');
+                
+                // تحديث حقل الموقع في نافذة الطلب مع رسالة مناسبة
+                const locationInfo = document.getElementById('orderLocationInfo');
+                if (locationInfo) {
+                    locationInfo.innerHTML = `
+                        <p><strong style="color: #28a745;">✓ تم تحديد الموقع يدوياً:</strong> ${this.state.selectedOrderLocation.address}</p>
+                        <button type="button" id="pickLocationBtn" class="btn-secondary">
+                            <i class="fas fa-map-pin"></i> تغيير الموقع
+                        </button>
+                    `;
+                    document.getElementById('pickLocationBtn').addEventListener('click', () => this.showLocationPicker());
+                }
+                this.showAlert('تم تحديد الموقع بنجاح', 'success');
+            }
+            
+            useCurrentLocationForPicker() {
+                if (this.state.currentPosition) {
+                    this.state.locationPickerMap.setView([this.state.currentPosition.lat, this.state.currentPosition.lng], 13);
+                    this.state.locationMarker.setLatLng([this.state.currentPosition.lat, this.state.currentPosition.lng]);
+                    this.state.selectedOrderLocation = this.state.currentPosition;
+                    this.showAlert('تم استخدام موقعك الحالي', 'success');
+                } else {
+                    this.getUserLocation().then(success => {
+                        if (success) {
+                            this.state.locationPickerMap.setView([this.state.currentPosition.lat, this.state.currentPosition.lng], 13);
+                            this.state.locationMarker.setLatLng([this.state.currentPosition.lat, this.state.currentPosition.lng]);
+                            this.state.selectedOrderLocation = this.state.currentPosition;
+                            this.showAlert('تم استخدام موقعك الحالي', 'success');
+                        }
+                    });
+                }
+            }
+            
+            showNewOrderModal() {
+                if (!this.state.user) {
+                    this.showAlert('يجب إكمال بيانات الزبون أولاً', 'error');
+                    this.showSection('customer');
+                    return;
+                }
+                this.state.selectedOrderLocation = null;
+                const locationInfo = document.getElementById('orderLocationInfo');
+                if (locationInfo) {
+                    if (this.state.currentPosition) {
+                        locationInfo.innerHTML = `
+                            <p>سيتم استخدام موقعك الحالي تلقائياً <span style="color: #6c757d;">(${this.state.currentPosition.address})</span></p>
+                            <button type="button" id="pickLocationBtn" class="btn-secondary">
+                                <i class="fas fa-map-pin"></i> تغيير الموقع
+                            </button>
+                        `;
+                        document.getElementById('pickLocationBtn').addEventListener('click', () => this.showLocationPicker());
+                    } else {
+                        locationInfo.innerHTML = `
+                            <p>جاري تحديد موقعك...</p>
+                            <button type="button" id="pickLocationBtn" class="btn-secondary">
+                                <i class="fas fa-map-pin"></i> تحديد الموقع يدوياً
+                            </button>
+                        `;
+                        this.getUserLocation().then(success => {
+                            if (success) {
+                                locationInfo.innerHTML = `
+                                    <p>سيتم استخدام موقعك الحالي تلقائياً <span style="color: #6c757d;">(${this.state.currentPosition.address})</span></p>
+                                    <button type="button" id="pickLocationBtn" class="btn-secondary">
+                                        <i class="fas fa-map-pin"></i> تغيير الموقع
+                                    </button>
+                                `;
+                                document.getElementById('pickLocationBtn').addEventListener('click', () => this.showLocationPicker());
+                            }
+                        });
+                        document.getElementById('pickLocationBtn').addEventListener('click', () => this.showLocationPicker());
+                    }
+                }
+                this.showModal('newOrderModal');
+            }
+            
+            // دالة إنشاء الطلب المعدلة (إرسال في الخلفية)
+            async createOrder(e) {
+                e.preventDefault();
+                if (!this.state.user) {
+                    this.showAlert('يجب إكمال بيانات الزبون أولاً', 'error');
+                    this.showSection('customer');
+                    return;
+                }
+
+                // التحقق من صحة رقم الواتساب (تم التحقق عند الحفظ ولكن نعيد التأكيد)
+                if (!this.state.user.phone.startsWith('+963') || this.state.user.phone.length < 13) {
+                    this.showAlert('رقم الواتساب غير صحيح، يرجى تحديث بيانات الزبون', 'error');
+                    this.showSection('customer');
+                    return;
+                }
+
+                const service = document.getElementById('orderService').value;
+                const details = document.getElementById('orderDetails').value;
+                if (!service || !details) {
+                    this.showAlert('يرجى تعبئة جميع الحقول', 'error');
+                    return;
+                }
+                
+                // تحديد الموقع (يدوي أو تلقائي)
+                let location;
+                if (this.state.selectedOrderLocation) {
+                    location = this.state.selectedOrderLocation;
+                } else if (this.state.currentPosition) {
+                    location = this.state.currentPosition;
+                } else {
+                    // إذا لم يتم تحديد موقع، نطلب منه التحديد يدوياً
+                    const { value: accept } = await Swal.fire({
+                        title: 'تحديد الموقع',
+                        text: 'لم يتم تحديد موقعك تلقائياً، هل تريد التحديد يدوياً؟',
+                        icon: 'info',
+                        showCancelButton: true,
+                        confirmButtonText: 'تحديد يدوياً',
+                        cancelButtonText: 'إلغاء'
+                    });
+                    if (accept) {
+                        this.showLocationPicker();
+                        return;
+                    } else {
+                        return;
+                    }
+                }
+                
+                // إغلاق النافذة فوراً وإظهار رسالة "جاري الإرسال"
+                this.closeModals();
+                this.showLoading('جاري إرسال الطلب...');
+                
+                const order = {
+                    id: 'order_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+                    service,
+                    details,
+                    location,
+                    phone: this.state.user.phone,
+                    customerName: this.state.user.name,
+                    userId: this.state.user.id,
+                    timestamp: new Date().toISOString(),
+                    status: 'new',
+                    hidden: false
+                };
+                
+                try {
+                    this.state.orders.push(order);
+                    this.state.newOrdersCheck.push(order.id);
+                    this.saveToStorage('newOrdersCheck', this.state.newOrdersCheck);
+                    this.addOrderToMap(order);
+                    await this.saveOrdersToSheet();
+                    await this.sendBotNotifications(order);
+                    
+                    this.hideLoading();
+                    this.showAlert('تم إرسال الطلب بنجاح', 'success');
+                    document.getElementById('newOrderForm').reset();
+                    this.state.selectedOrderLocation = null;
+                    this.updateDisplay();
+                } catch (error) {
+                    this.hideLoading();
+                    // عرض رسالة خطأ مع خيار إعادة المحاولة
+                    Swal.fire({
+                        title: 'فشل الإرسال',
+                        text: 'حدث خطأ في الاتصال. هل تريد إعادة المحاولة؟',
+                        icon: 'error',
+                        showCancelButton: true,
+                        confirmButtonText: 'إعادة المحاولة',
+                        cancelButtonText: 'إلغاء'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // إعادة فتح نافذة الطلب بنفس البيانات
+                            this.showNewOrderModal();
+                            document.getElementById('orderService').value = service;
+                            document.getElementById('orderDetails').value = details;
+                            this.state.selectedOrderLocation = location;
+                        }
+                    });
+                }
+            }
+            
+            addOrderToMap(order) {
+                const marker = L.marker([order.location.lat, order.location.lng], {
+                    icon: L.divIcon({
+                        className: 'order-marker',
+                        html: `<div style="background: ${this.getStatusColor(order.status)}; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; border: 3px solid white; box-shadow: 0 0 20px rgba(0,0,0,0.4);">
+                                 <i class="${this.serviceIcons[order.service]}" style="font-size: 20px;"></i>
+                               </div>`,
+                        iconSize: [45, 45],
+                        iconAnchor: [22.5, 22.5]
+                    })
+                }).addTo(this.state.map);
+                marker.bindPopup(this.createPopup(order));
+                marker.on('click', () => this.viewOrder(order.id));
+                this.state.markers[order.id] = marker;
+            }
+            
+            cleanOldOrders() {
+                const now = Date.now();
+                this.state.orders = this.state.orders.filter(order => {
+                    const orderTime = new Date(order.timestamp).getTime();
+                    const age = now - orderTime;
+                    if ((order.status === 'completed' || order.status === 'cancelled') && age > 2 * 60 * 1000) return false;
+                    if (order.status === 'new' && age > this.config.ORDER_TIMEOUT) return false;
+                    if (order.status === 'taken') {
+                        const takenAge = now - (order.takenAt || orderTime);
+                        order.hidden = takenAge > this.config.TAKEN_TIMEOUT;
+                    }
+                    return true;
+                });
+            }
+            
+            updateMap() {
+                Object.values(this.state.markers).forEach(m => m && m.remove());
+                this.state.markers = {};
+                const serviceFilter = document.getElementById('serviceFilter').value;
+                this.state.lastFilter = serviceFilter;
+                this.state.orders.forEach(order => {
+                    if (!order.location || order.status === 'completed' || order.status === 'cancelled' || order.hidden) return;
+                    if (serviceFilter === 'all' || order.service === serviceFilter) {
+                        const marker = L.marker([order.location.lat, order.location.lng], {
+                            icon: L.divIcon({
+                                className: 'order-marker',
+                                html: `<div style="background: ${this.getStatusColor(order.status)}; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; border: 3px solid white; box-shadow: 0 0 20px rgba(0,0,0,0.4);">
+                                         <i class="${this.serviceIcons[order.service]}" style="font-size: 20px;"></i>
+                                       </div>`,
+                                iconSize: [45, 45],
+                                iconAnchor: [22.5, 22.5]
+                            })
+                        }).addTo(this.state.map);
+                        marker.bindPopup(this.createPopup(order));
+                        marker.on('click', () => this.viewOrder(order.id));
+                        this.state.markers[order.id] = marker;
+                    }
+                });
+            }
+            
+            getStatusColor(status) {
+                return { new: '#4361ee', taken: '#f8961e', completed: '#4cc9f0', cancelled: '#f94144' } [status] || '#4361ee';
+            }
+            
+            createPopup(order) {
+                const distance = this.state.currentPosition ?
+                    this.calculateDistance(this.state.currentPosition.lat, this.state.currentPosition.lng, order.location.lat, order.location.lng).toFixed(1) : 'غير معروف';
+                return `
+                    <div style="padding: 15px; max-width: 320px; font-size: 1rem;">
+                        <h4 style="margin: 0 0 10px; color: #6a11cb; font-size: 1.3rem;"><i class="${this.serviceIcons[order.service]}"></i> ${this.serviceNames[order.service]}</h4>
+                        <p><strong>الحالة:</strong> ${this.getStatusText(order.status)}</p>
+                        <p><strong>المسافة:</strong> ${distance} كم</p>
+                        <p><strong>رقم التواصل:</strong> ${order.phone}</p>
+                        <p><strong>التفاصيل:</strong> ${order.details.substring(0, 60)}...</p>
+                        <button onclick="app.viewOrder('${order.id}')" style="background: #6a11cb; color: white; border: none; padding: 10px 18px; border-radius: 10px; width: 100%; font-weight: bold; font-size: 1rem; cursor: pointer;">عرض التفاصيل</button>
+                    </div>
+                `;
+            }
+            
+            // دالة عرض الطلبات القريبة (تستخدم المسافة 2 كم)
+            updateNearbyOrders() {
+                const container = document.getElementById('nearbyOrders');
+                if (!container) return;
+                if (!this.state.currentPosition) {
+                    container.innerHTML = '<p style="text-align: center; font-size: 1.2rem;">تحديد الموقع غير متاح</p>';
+                    return;
+                }
+                const serviceFilter = document.getElementById('serviceFilter').value;
+                let nearbyOrders = this.state.orders.filter(o => o.status === 'new' && !o.hidden && (serviceFilter === 'all' || o.service === serviceFilter) && o.location);
+                nearbyOrders.forEach(o => o.distance = this.calculateDistance(this.state.currentPosition.lat, this.state.currentPosition.lng, o.location.lat, o.location.lng));
+                nearbyOrders = nearbyOrders.filter(o => o.distance <= this.config.NEARBY_DISTANCE).sort((a, b) => a.distance - b.distance);
+                if (nearbyOrders.length === 0) {
+                    container.innerHTML = '<p style="text-align: center; font-size: 1.2rem;">لا توجد طلبات قريبة</p>';
+                    return;
+                }
+                container.innerHTML = nearbyOrders.map(order => `
+                    <div class="order-item" data-id="${order.id}">
+                        <div class="order-item-header">
+                            <span class="order-item-service"><i class="${this.serviceIcons[order.service]}"></i> ${this.serviceNames[order.service]}</span>
+                            <span class="order-item-status status-new">جديد</span>
+                        </div>
+                        <div class="order-item-details">${order.details.substring(0, 100)}...</div>
+                        <div class="order-item-footer">
+                            <span><i class="fas fa-map-marker-alt"></i> ${order.distance.toFixed(1)} كم</span>
+                            <div class="order-item-actions">
+                                <button class="btn-secondary" onclick="app.viewOrder('${order.id}')"><i class="fas fa-eye"></i></button>
+                                ${this.state.provider ? `<button class="btn-success" onclick="app.takeOrder('${order.id}')"><i class="fas fa-hand-paper"></i></button>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            // دالة عرض الاقتراحات (خدمات أخرى قريبة)
+            updateSuggestedOrders() {
+                const container = document.getElementById('suggestedOrders');
+                if (!container) return;
+                if (!this.state.currentPosition) {
+                    container.innerHTML = '';
+                    return;
+                }
+                const serviceFilter = document.getElementById('serviceFilter').value;
+                let suggested = this.state.orders.filter(o => 
+                    o.status === 'new' && !o.hidden && 
+                    (serviceFilter !== 'all' ? o.service !== serviceFilter : true) && 
+                    o.location
+                );
+                suggested.forEach(o => o.distance = this.calculateDistance(this.state.currentPosition.lat, this.state.currentPosition.lng, o.location.lat, o.location.lng));
+                suggested = suggested.filter(o => o.distance <= this.config.NEARBY_DISTANCE).sort((a, b) => a.distance - b.distance).slice(0, 4); // حد أقصى 4 اقتراحات
+                
+                if (suggested.length === 0) {
+                    container.innerHTML = '<p style="text-align: center; color: #888; font-size: 1.2rem;">لا توجد خدمات أخرى قريبة</p>';
+                    return;
+                }
+                container.innerHTML = suggested.map(order => `
+                    <div class="order-item" data-id="${order.id}" style="border-right-color: #f39c12;">
+                        <div class="order-item-header">
+                            <span class="order-item-service"><i class="${this.serviceIcons[order.service]}"></i> ${this.serviceNames[order.service]}</span>
+                            <span class="order-item-status status-new">جديد</span>
+                        </div>
+                        <div class="order-item-details">${order.details.substring(0, 80)}...</div>
+                        <div class="order-item-footer">
+                            <span><i class="fas fa-map-marker-alt"></i> ${order.distance.toFixed(1)} كم</span>
+                            <div class="order-item-actions">
+                                <button class="btn-secondary" onclick="app.viewOrder('${order.id}')"><i class="fas fa-eye"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            async takeOrder(orderId) {
+                if (!this.state.provider) {
+                    this.showAlert('يجب إكمال إعدادات مقدم الخدمة أولاً', 'error');
+                    this.showSection('provider');
+                    return;
+                }
+                const order = this.state.orders.find(o => o.id === orderId);
+                if (!order || order.status !== 'new') {
+                    this.showAlert('الطلب غير متاح', 'warning');
+                    return;
+                }
+                order.status = 'taken';
+                order.takenBy = this.state.provider.id;
+                order.takenAt = Date.now();
+                order.takenByName = this.state.provider.name;
+                order.hidden = false;
+                this.state.takenOrders.push(order);
+                await this.saveOrdersToSheet();
+                this.updateDisplay();
+                this.showAlert('تم أخذ الطلب', 'success');
+                this.sendWhatsAppNotification(order, 'taken');
+            }
+            
+            async cancelOrder(orderId) {
+                const order = this.state.orders.find(o => o.id === orderId);
+                if (!order) return;
+                if (order.status === 'taken' && order.takenBy === this.state.provider?.id) {
+                    order.status = 'new';
+                    order.takenBy = null;
+                    order.takenAt = null;
+                    order.takenByName = null;
+                    order.hidden = false;
+                    this.state.takenOrders = this.state.takenOrders.filter(o => o.id !== orderId);
+                } else if (order.userId === this.state.user?.id) {
+                    order.status = 'cancelled';
+                }
+                await this.saveOrdersToSheet();
+                this.updateDisplay();
+                this.showAlert('تم الإلغاء', 'warning');
+            }
+            
+            async completeOrder(orderId) {
+                const order = this.state.orders.find(o => o.id === orderId);
+                if (!order) return;
+                order.status = 'completed';
+                order.completedAt = Date.now();
+                this.state.takenOrders = this.state.takenOrders.filter(o => o.id !== orderId);
+                await this.saveOrdersToSheet();
+                this.updateDisplay();
+                this.showAlert('تم إكمال الطلب', 'success');
+            }
+            
+            sendWhatsAppNotification(order, action) {
+                if (!order.phone) return;
+                if (action === 'taken' && order.takenByName) {
+                    const msg = `مرحباً ${order.customerName}، ${order.takenByName} قام بأخذ طلبك وسيتواصل معك قريباً.`;
+                    window.open(`https://wa.me/${order.phone}?text=${encodeURIComponent(msg)}`, '_blank');
+                }
+            }
+            
+            filterOrders(service) {
+                this.updateMap();
+                this.updateNearbyOrders();
+                this.updateSuggestedOrders(); // تحديث الاقتراحات
+            }
+            
+            saveFilterPreference() {
+                const filter = document.getElementById('serviceFilter').value;
+                this.saveToStorage('filter', filter);
+            }
+            
+            loadFilterPreference() {
+                const saved = this.getFromStorage('filter') || 'all';
+                document.getElementById('serviceFilter').value = saved;
+                this.state.lastFilter = saved;
+            }
+            
+            updateDisplay() {
+                this.updateMap();
+                this.updateNearbyOrders();
+                this.updateSuggestedOrders();
+                this.renderMyOrders();
+                this.renderTakenOrders();
+            }
+            
+            showUnakenOrdersOnMap() {
+                const unaken = this.state.orders.filter(o => o.status === 'new' && o.location);
+                if (unaken.length > 0) {
+                    const totalLat = unaken.reduce((s, o) => s + o.location.lat, 0) / unaken.length;
+                    const totalLng = unaken.reduce((s, o) => s + o.location.lng, 0) / unaken.length;
+                    this.state.map.setView([totalLat, totalLng], 11);
+                    this.showAlert(`يوجد ${unaken.length} طلب غير مأخوذ`, 'info');
+                }
+            }
+            
+            startAutoUpdate() {
+                if (this.state.updateTimer) clearInterval(this.state.updateTimer);
+                this.state.updateTimer = setInterval(async () => {
+                    const currentOrders = [...this.state.orders];
+                    await this.loadOrdersFromSheet();
+                    if (!this.state.isFirstLoad && currentOrders.length > 0) {
+                        this.checkForNewOrdersOnly(currentOrders);
+                    }
+                    this.updateAppStatus('آخر تحديث: ' + new Date().toLocaleTimeString('ar-SA'));
+                }, this.config.UPDATE_INTERVAL);
+            }
+            
+            checkForNewOrdersOnly(oldOrders) {
+                if (!this.state.provider) return;
+                const oldIds = new Set(oldOrders.map(o => o.id));
+                const oldNewIds = new Set(oldOrders.filter(o => o.status === 'new').map(o => o.id));
+                const newOrders = this.state.orders.filter(o => o.status === 'new' && !oldIds.has(o.id));
+                const reactivated = this.state.orders.filter(o => o.status === 'new' && oldIds.has(o.id) && !oldNewIds.has(o.id) && !this.state.newOrdersCheck.includes(o.id));
+                [...newOrders, ...reactivated].forEach(order => {
+                    this.sendBotNotifications(order);
+                    if (!this.state.newOrdersCheck.includes(order.id)) {
+                        this.state.newOrdersCheck.push(order.id);
+                    }
+                });
+                if (newOrders.length || reactivated.length) {
+                    this.showAlert(`تم إضافة ${newOrders.length + reactivated.length} طلب جديد`, 'success');
+                    this.saveToStorage('newOrdersCheck', this.state.newOrdersCheck);
+                }
+            }
+            
+            showSection(section) {
+                document.querySelectorAll('.content-section').forEach(el => el.classList.remove('active'));
+                document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+                document.getElementById(section + 'Section').classList.add('active');
+                document.getElementById(section + 'Btn').classList.add('active');
+                if (section === 'home') {
+                    setTimeout(() => this.state.map?.invalidateSize(), 100);
+                    this.updateDisplay();
+                } else if (section === 'customer') {
+                    this.renderMyOrders();
+                } else if (section === 'provider') {
+                    this.renderTakenOrders();
+                    this.displayProviderChannels();
+                } else if (section === 'admin') {
+                    if (this.state.adminLoggedIn) {
+                        document.getElementById('adminLogin').style.display = 'none';
+                        document.getElementById('adminContent').style.display = 'block';
+                        this.displayAdminChannels();
+                    } else {
+                        document.getElementById('adminLogin').style.display = 'block';
+                        document.getElementById('adminContent').style.display = 'none';
+                        document.getElementById('adminPassword').value = '';
+                    }
+                }
+            }
+            
+            showModal(modalId) {
+                document.getElementById(modalId).classList.add('active');
+            }
+            
+            closeModals() {
+                document.querySelectorAll('.modal').forEach(m => m.classList.remove('active'));
+            }
+            
+            showAlert(message, type = 'info') {
+                Swal.fire({ title: message, icon: type, timer: 3000, toast: true, position: 'top-end', showConfirmButton: false });
+            }
+            
+            viewOrder(orderId) {
+                const order = this.state.orders.find(o => o.id === orderId);
+                if (!order) return;
+                const content = document.getElementById('orderDetailsContent');
+                content.innerHTML = `
+                    <div style="padding: 15px;">
+                        <h4 style="color: #6a11cb; font-size: 1.5rem;"><i class="${this.serviceIcons[order.service]}"></i> ${this.serviceNames[order.service]}</h4>
+                        <p><strong>التفاصيل:</strong> ${order.details}</p>
+                        <p><strong>الموقع:</strong> ${order.location.address}</p>
+                        <p><strong>الزبون:</strong> ${order.customerName} - <a href="https://wa.me/${order.phone}" target="_blank">${order.phone}</a></p>
+                        <p><strong>الحالة:</strong> ${this.getStatusText(order.status)}</p>
+                        <div style="display: flex; gap: 15px; margin-top: 25px;">
+                            ${order.status === 'new' && this.state.provider ? `<button onclick="app.takeOrder('${order.id}')" class="btn-primary">أخذ الطلب</button>` : ''}
+                            ${(order.status === 'taken' && order.takenBy === this.state.provider?.id) ? `<button onclick="app.completeOrder('${order.id}')" class="btn-success">إكمال</button><button onclick="app.cancelOrder('${order.id}')" class="btn-danger">إلغاء</button>` : ''}
+                            ${order.userId === this.state.user?.id && order.status === 'new' ? `<button onclick="app.cancelOrder('${order.id}')" class="btn-danger">إلغاء</button>` : ''}
+                        </div>
+                    </div>
+                `;
+                this.showModal('orderDetailsModal');
+            }
+            
+            async saveCustomer(e) {
+                e.preventDefault();
+                const name = document.getElementById('customerName').value;
+                const phone = document.getElementById('customerPhone').value;
+                if (!name || !phone) {
+                    this.showAlert('يرجى تعبئة الحقول', 'error');
+                    return;
+                }
+                // التحقق من صيغة رقم الواتساب
+                if (!phone.startsWith('+963') || phone.length < 13) {
+                    this.showAlert('رقم الواتساب يجب أن يبدأ بـ +963 ويتكون من 13 رقم (مثال: +963912345678)', 'error');
+                    return;
+                }
+                this.state.user = { id: 'user_' + Date.now(), name, phone, createdAt: new Date().toISOString() };
+                this.saveToStorage('user', this.state.user);
+                this.showAlert('تم حفظ بيانات الزبون', 'success');
+                this.renderMyOrders();
+            }
+            
+            async saveProvider(e) {
+                e.preventDefault();
+                const name = document.getElementById('providerName').value;
+                const services = [];
+                document.querySelectorAll('input[name="services"]:checked').forEach(cb => services.push(cb.value));
+                if (!name || services.length === 0) {
+                    this.showAlert('يرجى تعبئة الحقول المطلوبة', 'error');
+                    return;
+                }
+                
+                this.state.provider = {
+                    id: 'provider_' + Date.now(),
+                    name,
+                    services,
+                    createdAt: new Date().toISOString()
+                };
+                this.saveToStorage('provider', this.state.provider);
+                
+                this.resetNewOrdersCheck();
+                this.showAlert('تم حفظ إعدادات مقدم الخدمة', 'success');
+                this.renderTakenOrders();
+                this.displayProviderChannels();
+            }
+            
+            renderMyOrders() {
+                const container = document.getElementById('myOrdersList');
+                if (!container) return;
+                const myOrders = this.state.orders.filter(o => o.userId === this.state.user?.id).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                if (myOrders.length === 0) {
+                    container.innerHTML = '<p style="text-align: center; font-size: 1.2rem;">لا توجد طلبات</p>';
+                    return;
+                }
+                container.innerHTML = myOrders.map(order => `
+                    <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 18px; margin-bottom: 1.5rem; border-right: 8px solid ${this.getStatusColor(order.status)}; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <strong style="font-size: 1.3rem;"><i class="${this.serviceIcons[order.service]}"></i> ${this.serviceNames[order.service]}</strong>
+                            <span style="background: ${this.getStatusColor(order.status)}20; color: ${this.getStatusColor(order.status)}; padding: 0.5rem 1.5rem; border-radius: 40px; font-size: 1rem; font-weight: 700;">${this.getStatusText(order.status)}</span>
+                        </div>
+                        <p style="color: #555; margin-bottom: 0.8rem; font-size: 1.1rem;">${order.details.substring(0, 100)}...</p>
+                        <small style="color: #888; font-size: 1rem;">${new Date(order.timestamp).toLocaleString('ar-SA')}</small>
+                    </div>
+                `).join('');
+            }
+            
+            renderTakenOrders() {
+                const container = document.getElementById('takenOrdersList');
+                if (!container) return;
+                if (this.state.takenOrders.length === 0) {
+                    container.innerHTML = '<p style="text-align: center; font-size: 1.2rem;">لا توجد طلبات مأخوذة</p>';
+                    return;
+                }
+                container.innerHTML = this.state.takenOrders.map(order => `
+                    <div style="background: #fff3e0; padding: 1.5rem; border-radius: 18px; margin-bottom: 1.5rem; border-right: 8px solid #f8961e; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                        <strong style="font-size: 1.3rem;"><i class="${this.serviceIcons[order.service]}"></i> ${this.serviceNames[order.service]}</strong>
+                        <p style="color: #555; margin: 1rem 0; font-size: 1.1rem;">${order.details.substring(0, 100)}...</p>
+                        <p style="font-size: 1.1rem;">الزبون: <a href="https://wa.me/${order.phone}" target="_blank">${order.phone}</a></p>
+                        <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                            <button onclick="app.completeOrder('${order.id}')" class="btn-success">إكمال</button>
+                            <button onclick="app.cancelOrder('${order.id}')" class="btn-danger">إلغاء</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            resetNewOrdersCheck() {
+                this.state.newOrdersCheck = this.state.orders.filter(o => o.status === 'new').map(o => o.id);
+                this.saveToStorage('newOrdersCheck', this.state.newOrdersCheck);
+            }
+            
+            calculateDistance(lat1, lon1, lat2, lon2) {
+                const R = 6371;
+                const dLat = (lat2 - lat1) * Math.PI / 180;
+                const dLon = (lon2 - lon1) * Math.PI / 180;
+                const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
+                return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            }
+            
+            getStatusText(status) {
+                return { new: 'جديد', taken: 'مأخوذ', completed: 'مكتمل', cancelled: 'ملغى' } [status] || status;
+            }
+            
+            loadUserData() {
+                this.state.user = this.getFromStorage('user');
+                this.state.provider = this.getFromStorage('provider');
+                this.state.orders = this.getFromStorage('orders') || [];
+                this.state.takenOrders = this.getFromStorage('takenOrders') || [];
+                this.state.newOrdersCheck = this.getFromStorage('newOrdersCheck') || [];
+                
+                if (this.state.user) {
+                    document.getElementById('customerName').value = this.state.user.name || '';
+                    document.getElementById('customerPhone').value = this.state.user.phone || '';
+                }
+                if (this.state.provider) {
+                    document.getElementById('providerName').value = this.state.provider.name || '';
+                    document.querySelectorAll('input[name="services"]').forEach(cb => {
+                        cb.checked = this.state.provider.services?.includes(cb.value) || false;
+                    });
+                }
+            }
+            
+            getFromStorage(key) {
+                try { return JSON.parse(localStorage.getItem(`talabat_${key}`)); } catch { return null; }
+            }
+            
+            saveToStorage(key, data) {
+                localStorage.setItem(`talabat_${key}`, JSON.stringify(data));
+            }
+            
+            updateAppStatus(status) {
+                document.getElementById('appStatus').textContent = 'الحالة: ' + status;
+            }
+        }
+        
+        let app;
+        window.addEventListener('DOMContentLoaded', () => {
+            app = new TalabatApp();
+            window.app = app;
+        });
+    </script>
+</body>
+</html>
