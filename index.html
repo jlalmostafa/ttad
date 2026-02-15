@@ -888,7 +888,21 @@
             async sendTelegramMessage(token, chatId, order) {
                 if (!chatId) return false;
                 const distance = this.calculateDistance(this.config.MAP_CENTER[0], this.config.MAP_CENTER[1], order.location.lat, order.location.lng).toFixed(1);
-                const msg = `♻ *طلب خدمة جديد*\n━━━━━━━━━━━━━━\n🔧 *الخدمة:* ${this.serviceNames[order.service]}\n📝 *التفاصيل:* ${order.details}\n📍 *الموقع:* ${order.location.address}\n📏 *المسافة:* ${distance} كم\n📞 *الرقم:* ${order.phone}\n👤 *الزبون:* ${order.customerName}\n🗺️ *الخريطة:* https://maps.google.com/?q=${order.location.lat},${order.location.lng}\n📱 *واتساب:* https://wa.me/${order.phone}`;
+                const msg = = `
+♻ *طلب خدمة جديد*
+━━━━━━━━━━━━━━
+🔧 *الخدمة:* ${this.serviceNames[order.service]}
+📝*التفاصيل:* ${order.details}
+---------------------------------------------------
+📍 *الموقع:* ${order.location.address}
+📏 *المسافة من مركز إدلب:* ${distance} كم
+📞 *رقم الواتساب:* ${order.phone}
+👤 *الزبون:* ${order.customerName || 'غير محدد'}
+🗺️ *الخريطة:* https://maps.google.com/?q=${order.location.lat},${order.location.lng}
+📱 *رابط الواتساب:* https://wa.me/${order.phone}
+━━━━━━━━━━━━━━
+
+                    `;
                 try {
                     const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
                         method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -1293,6 +1307,6 @@
         window.addEventListener('DOMContentLoaded', () => { app = new TalabatApp(); window.app = app; });
     </script>
     
-    <script src="sw.js" type="text/javascript" charset="utf-8"></script>
+    <script src=".js" type="text/javascript" charset="utf-8"></script>
 </body>
 </html>
